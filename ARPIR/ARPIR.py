@@ -38,7 +38,6 @@ header = """
   -q, --quantification-method [featureCounts,Cufflinks]
   -r, --reference-genome [/opt/genome/human/hg19/index/hg19.fa]
   -dea, --dea-method [edgeR,DESeq2,cummeRbund]
-  -script_path, --script_path [/opt/applications/src/arpir/ARPIR]
   -o, --output-dir
   -meta, --meta-analysis [full,quant]
   -cat, --max-cat [5]
@@ -74,11 +73,9 @@ parser.add_argument('-t', '--threads', dest="Threads", help="Max thread number. 
 parser.add_argument('-g', '--gtf', dest="GTF", help="GTF file path. \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf")
 parser.add_argument('-a', '--alignment-method', dest="a_method", help="Alignment method. \n Default: hisat; alternative: tophat. \n", action="store", required=False, default="hisat")
 parser.add_argument('-l', '--library-type', dest="library_type", help="Library type. \n Default: fr-firststrand; alternative: fr-secondstrand. \n", action="store", required=False, default="fr-firststrand")
-#parser.add_argument('-i', '--input', dest="input_path", help="Input path dataframe. \n No default option. \n", action="store", required=True)
 parser.add_argument('-q', '--quantification-method', dest="q_method", help="Quantification method. \n Default: featureCounts; alternative: Cufflinks. \n", action="store", required=False, default="featureCounts")
 parser.add_argument('-r', '--reference-genome', dest="ref_gen", help="Reference genome file path (only for Cufflinks). \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hg19.fa")
 parser.add_argument('-dea', '--dea-method', dest="dea_method", help="Differential Expression Analysis method. \n Default: edgeR; alternatives: DESeq2, cummeRbund. \n", action="store", required=False, default="edgeR")
-parser.add_argument('-script_path', '--script_path', dest="script_path", help="Script directory (alignment, quantification and DEA). \n Default: /opt/applications/src/arpir/ARPIR. \n", action="store", required=False, default="/opt/applications/src/arpir/ARPIR")
 parser.add_argument('-o', '--output-dir', dest="output_dir", help="Output directory. \n No default option. \n", action="store", required=True)
 parser.add_argument('-meta', '--meta-analysis', dest="meta", help="Analysis with or without final meta-analysis. \n Default: full; alternative: quant. \n", action="store", required=False, default="full")
 parser.add_argument('-cat', '--max_cat', dest="max_cat", help="Max number of category showed in R plots for meta-analysis. \n Default: 5. \n", action="store", required=False, default="5")
@@ -117,7 +114,6 @@ def checkArgs(args):
     print "Quantification method =", args.q_method, "\n"
     print "Reference genome =", args.ref_gen, "\n"
     print "DEA method =", args.dea_method, "\n"
-    print "Script path =", args.script_path, "\n"
     print "Output directory =", args.output_dir, "\n"
     if not os.path.isfile(args.bed_file):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid path for BED file.\n\tExit\n" + '\033[0m')
@@ -150,14 +146,14 @@ def checkArgs(args):
             if not os.path.isfile(r2[j]):
                 print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid paths for read 2.\n\tExit\n" + '\033[0m')
                 sys.exit()
-    script_path1=args.script_path+"/alignment.sh"
-    script_path2=args.script_path+"/quantification.py"
-    script_path3=args.script_path+"/GO_pathway.R"
-    script_path4=args.script_path+"/CNETPLOT_FUNCTION.R"
-    script_path5=args.script_path+"/alignment_se.sh"
-    script_path6=args.script_path+"/runcummeRbund.R"
-    script_path7=args.script_path+"/runDESeq2.R"
-    script_path8=args.script_path+"/runedgeR.R"
+    script_path1=os.path.abspath(os.path.dirname(sys.argv[0]))+"/alignment.sh"
+    script_path2=os.path.abspath(os.path.dirname(sys.argv[0]))+"/quantification.py"
+    script_path3=os.path.abspath(os.path.dirname(sys.argv[0]))+"/GO_pathway.R"
+    script_path4=os.path.abspath(os.path.dirname(sys.argv[0]))+"/CNETPLOT_FUNCTION.R"
+    script_path5=os.path.abspath(os.path.dirname(sys.argv[0]))+"/alignment_se.sh"
+    script_path6=os.path.abspath(os.path.dirname(sys.argv[0]))+"/runcummeRbund.R"
+    script_path7=os.path.abspath(os.path.dirname(sys.argv[0]))+"/runDESeq2.R"
+    script_path8=os.path.abspath(os.path.dirname(sys.argv[0]))+"/runedgeR.R"
     if not os.path.isfile(script_path1) or not os.path.isfile(script_path5):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no alignment scripts.\n\tExit\n" + '\033[0m')
         sys.exit()
@@ -217,11 +213,10 @@ def checkFile(read1,read2,stype,sample_name):
     
 
 
-def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,ref_bowtie,ref_hisat2,bed_file,phix,rib1,rib2,a_method,GTF,library_type,script_path,stype,q_method,dea_method):
+def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,ref_bowtie,ref_hisat2,bed_file,phix,rib1,rib2,a_method,GTF,library_type,stype,q_method,dea_method):
     """
     Run alignment script as desired
     """
-#    print ('\033[1;33m' + "\n^^^^^^^^^Alignment script running^^^^^^^^^\n" + '\033[0m')
     cmd1="mkdir "+output_dir+"/"+project_name
     os.system(cmd1)
     cmd2="mkdir "+output_dir+"/"+project_name+"/"+pool_name
@@ -261,21 +256,20 @@ def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,
     if read2 != "":
         read2a=read2.split(",")
         for i in range(0, (len(read1a))):
-            cmd="bash "+script_path+"/alignment.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+read2a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+script_path
+            cmd="bash "+os.path.abspath(os.path.dirname(sys.argv[0]))+"/alignment.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+read2a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+os.path.abspath(os.path.dirname(sys.argv[0]))
             os.system(cmd)
     if read2 == "":
         for i in range(0, (len(read1a))):
-            cmd="bash "+script_path+"/alignment_se.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+script_path
+            cmd="bash "+os.path.abspath(os.path.dirname(sys.argv[0]))+"/alignment_se.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+os.path.abspath(os.path.dirname(sys.argv[0]))
             os.system(cmd)
 
 
-def quantification(output_dir,project_name,pool_name,script_path,dea_method,q_method,Threads,GTF,library_type,ref_gen):
+def quantification(output_dir,project_name,pool_name,dea_method,q_method,Threads,GTF,library_type,ref_gen):
     """
     Run quantification script as desired
     """
-#    print ('\033[1;33m' + "\n^^^^^^^^^Quantification script running^^^^^^^^^\n" + '\033[0m')
     res_dir=output_dir+"/"+project_name+"/"+pool_name
-    cmd="python "+script_path+"/quantification.py -i "+output_dir+'/'+project_name+'/'+pool_name+'/input.csv'+" -o "+res_dir+"/Quantification_and_DEA"+" -script_path "+script_path+" -dea "+dea_method+" -q "+q_method+" -t "+str(Threads)+" -g "+GTF+" -l "+library_type+" -r "+ref_gen
+    cmd="python "+os.path.abspath(os.path.dirname(sys.argv[0]))+"/quantification.py -i "+output_dir+'/'+project_name+'/'+pool_name+'/input.csv'+" -o "+res_dir+"/Quantification_and_DEA"+" -script_path "+os.path.abspath(os.path.dirname(sys.argv[0]))+" -dea "+dea_method+" -q "+q_method+" -t "+str(Threads)+" -g "+GTF+" -l "+library_type+" -r "+ref_gen
     os.system(cmd)
     
     
@@ -286,7 +280,7 @@ def rminput(output_dir,project_name,pool_name):
     os.system("rm "+output_dir+'/'+project_name+'/'+pool_name+'/input.csv')
     
     
-def metaanalysis(output_dir,script_path,project_name,pool_name,dea_method,max_cat):
+def metaanalysis(output_dir,project_name,pool_name,dea_method,max_cat):
     """
     Run meta-analysis script as desired
     """
@@ -294,7 +288,7 @@ def metaanalysis(output_dir,script_path,project_name,pool_name,dea_method,max_ca
     os.system("mkdir "+output_dir+"/"+project_name+"/"+pool_name+"/Meta-analysis/Gene_ontology")
     os.system("mkdir "+output_dir+"/"+project_name+"/"+pool_name+"/Meta-analysis/Pathway_analysis")
     os.system("mkdir "+output_dir+"/"+project_name+"/"+pool_name+"/Meta-analysis/Pathway_analysis/pathview")
-    cmd="Rscript --vanilla --verbose "+script_path+"/GO_pathway.R "+output_dir+'/'+project_name+'/'+pool_name+'/Quantification_and_DEA/*-results.csv '+dea_method+" "+output_dir+'/'+project_name+'/'+pool_name+"/Meta-analysis "+max_cat+" "+script_path
+    cmd="Rscript --vanilla --verbose "+os.path.abspath(os.path.dirname(sys.argv[0]))+"/GO_pathway.R "+output_dir+'/'+project_name+'/'+pool_name+'/Quantification_and_DEA/*-results.csv '+dea_method+" "+output_dir+'/'+project_name+'/'+pool_name+"/Meta-analysis "+max_cat+" "+os.path.abspath(os.path.dirname(sys.argv[0]))
     os.system(cmd)
         
 
@@ -312,17 +306,17 @@ def main():
     checkFile(args.read1,args.read2,args.stype,args.sample_name)
 
     # alignment
-    alignment(args.project_name,args.pool_name,args.sample_name,args.output_dir,args.read1,args.read2,args.Threads,args.ref_bowtie,args.ref_hisat2,args.bed_file,args.phix,args.rib1,args.rib2,args.a_method,args.GTF,args.library_type,args.script_path,args.stype,args.q_method,args.dea_method)
+    alignment(args.project_name,args.pool_name,args.sample_name,args.output_dir,args.read1,args.read2,args.Threads,args.ref_bowtie,args.ref_hisat2,args.bed_file,args.phix,args.rib1,args.rib2,args.a_method,args.GTF,args.library_type,args.stype,args.q_method,args.dea_method)
 
     # quantification
-    quantification(args.output_dir,args.project_name,args.pool_name,args.script_path,args.dea_method,args.q_method,args.Threads,args.GTF,args.library_type,args.ref_gen)
+    quantification(args.output_dir,args.project_name,args.pool_name,args.dea_method,args.q_method,args.Threads,args.GTF,args.library_type,args.ref_gen)
     
     # remove input file
     rminput(args.output_dir,args.project_name,args.pool_name)
     
     # meta-analysis (GO and pathway analysis)
     if args.meta == 'full':
-        metaanalysis(args.output_dir,args.script_path,args.project_name,args.pool_name,args.dea_method,args.max_cat)
+        metaanalysis(args.output_dir,args.project_name,args.pool_name,args.dea_method,args.max_cat)
     
 
 # sentinel
