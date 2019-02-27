@@ -25,7 +25,7 @@ Bioinformatics Pipelines
 *	featureCounts 1.5.3
 *	Cufflinks 2.2.1
 ### Input files
-*	<p align="justify">Fastq files of the samples. Since this is a differential analysis, at least one case and one control must be present, furthermore if it is a paired-end analysis files of read 1 and read 2 must be provided for each sample while if it is a single-end analysis only files of read 1 must be provided.</p>
+*	<p align="justify">Fastq files of the samples. Since this is a differential analysis, at least two case and two control must be present, furthermore if it is a paired-end analysis files of read 1 and read 2 must be provided for each sample while if it is a single-end analysis only files of read 1 must be provided.</p>
 *	<p align="justify">Reference genome for Bowtie with relative indices, necessary for alignment with TopHat. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/index/bowtie2/hg19.</p>
 *	<p align="justify">Reference genome for Hisat2 with relative indices, necessary for alignment with HISAT2. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/index/hisat2/hg19.</p>
 *	<p align="justify">BED file, necessary for quality control on BAM files. The path in which the file is searched by default is as follows: /opt/genome/human/hg19/annotation/hg19.refseq.bed12.</p>
@@ -41,11 +41,11 @@ Bioinformatics Pipelines
 
 #### Paired-end
 
-```RNAseq_pipeline -n <project_name> -pn <pool_name> -sn <sample_A,sample_B,sample_C,sample_D> -r1 <sample_A_read1,sample_B_read1,sample_C_read1,sample_D_read1> -r2 <sample_A_read2,sample_B_read2,sample_C_read1,sample_D_read1> -type <cntrl,cntrl,treat,treat> -o <output_directory> [options]*```
+```python ARPIR.py -n <project_name> -pn <pool_name> -sn <sample_A,sample_B,sample_C,sample_D> -r1 <sample_A_read1,sample_B_read1,sample_C_read1,sample_D_read1> -r2 <sample_A_read2,sample_B_read2,sample_C_read1,sample_D_read1> -type <cntrl,cntrl,treat,treat> -o <output_directory> [options]*```
 
 #### Single-end
 
-```RNAseq_pipeline -n <project_name> -pn <pool_name> -sn <sample_A,sample_B,sample_C,sample_D> -r1 <sample_A_read1,sample_B_read1,sample_C_read1,sample_D_read1> -type <cntrl,cntrl,treat,treat> -o <output_directory> [options]*```
+```python ARPIR.py -n <project_name> -pn <pool_name> -sn <sample_A,sample_B,sample_C,sample_D> -r1 <sample_A_read1,sample_B_read1,sample_C_read1,sample_D_read1> -type <cntrl,cntrl,treat,treat> -o <output_directory> [options]*```
 
 #### Arguments
 | | |
@@ -74,13 +74,12 @@ Bioinformatics Pipelines
 ```-q```	| Quantification method. Default: featureCounts; alternative: Cufflinks. <br>
 ```-r```	| Reference genome file path. Default: human hg19. [`/opt/genome/human/hg19/index/hg19.fa`] <br>
 ```-dea```	| Differential Expression Analysis method. Default: edgeR; alternatives: DESeq2, cummeRbund. <br>
-```-r_path```	| Script directory (alignment, quantification and DEA). Default: `/opt/applications/src/creo_pipelines/pipelines` <br>
 ```-meta``` | Analysis with or without final meta-analysis. Default: full; alternative: quant. <br>
 ```-cat``` | Max number of category showed in R plots for meta-analysis. Default: 5. <br>
 
 ### Graphical User Interface
 #### Usage
-```GUI_RNAseq_pipeline``` <br>
+```bash GUI_ARPIR.sh``` <br>
 A series of windows allow to indicate input files and to choose between various options.
 
 <p align="center"><img src="/images/GUI_screenshot.png" width="55%"></p>
