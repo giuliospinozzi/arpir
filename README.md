@@ -25,14 +25,14 @@
 *	Cufflinks 2.2.1
 ### Input files
 *	<p align="justify">Fastq files of the samples. Since this is a differential analysis, at least two case and two control must be present, furthermore if it is a paired-end analysis files of read 1 and read 2 must be provided for each sample while if it is a single-end analysis only files of read 1 must be provided.</p>
-*	<p align="justify">Reference genome for Bowtie with relative indices, necessary for alignment with TopHat. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/index/bowtie2/hg19.</p>
-*	<p align="justify">Reference genome for Hisat2 with relative indices, necessary for alignment with HISAT2. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/index/hisat2/hg19.</p>
+*	<p align="justify">Reference genome for Bowtie with relative indexes, necessary for alignment with TopHat. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/index/bowtie2/hg19.</p>
+*	<p align="justify">Reference genome for Hisat2 with relative indexes, necessary for alignment with HISAT2. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/index/hisat2/hg19.</p>
 *	<p align="justify">BED file, necessary for quality control on BAM files. The path in which the file is searched by default is as follows: /opt/genome/human/hg19/annotation/hg19.refseq.bed12.</p>
-*	<p align="justify">Phix genome with relative indices, necessary for pre-processing. The path in which the file with its indices is searched by default is as follows: /opt/genome/control/phix174/bwa/phiX174.fa.</p>
-*	<p align="justify">Ribosomal genome 1 with relative indices, necessary for pre-processing. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa.</p>
-*	<p align="justify">Ribosomal genome 2 with relative indices, necessary for pre-processing. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/humRibosomal.fa.</p>
+*	<p align="justify">Phix genome with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/control/phix174/bwa/phiX174.fa.</p>
+*	<p align="justify">Ribosomal genome 1 with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa.</p>
+*	<p align="justify">Ribosomal genome 2 with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/humRibosomal.fa.</p>
 *	<p align="justify">GTF file, necessary for alignment with TopHat and quantification with featureCounts and Cufflinks. The path in which the file is searched by default is as follows: /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf. </p>
-*	<p align="justify">Reference genome with relative indices, necessary for quantification with Cufflinks. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/index/hg19.fa. </p>
+*	<p align="justify">Reference genome with relative indexes, necessary for quantification with Cufflinks. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/index/hg19.fa. </p>
 
 ## Running application
 ### Command line
