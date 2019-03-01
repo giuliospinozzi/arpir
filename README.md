@@ -60,18 +60,18 @@
 #### Options
 | | |
 ------------ | -------------
-```-rb```	| Reference genome file path for bowtie. Default: human hg19. [`/opt/genome/human/hg19/index/bowtie2/hg19`] <br>
-```-rh```	| Reference genome file path for hisat2. Default: human hg19. [`/opt/genome/human/hg19/index/hisat2/hg19`] <br>
-```-bed```	| Reference genome annotation file path. Default: human hg19. [`/opt/genome/human/hg19/annotation/hg19.refseq.bed12`] <br>
-```-ph```	| Phix genome file path. Default: Phix. [`/opt/genome/control/phix174/bwa/phiX174.fa`] <br>
-```-rib1```	| Ribosomal genome file path. Default: human hg19. [`/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa`] <br>
-```-rib2```	| Ribosomal genome file path. Default: human hg19. [`/opt/genome/human/hg19/contam/bwa/humRibosomal.fa`] <br>
+```-rb```	| Reference genome file path for bowtie. Default: `/opt/genome/human/hg19/index/bowtie2/hg19` <br>
+```-rh```	| Reference genome file path for hisat2. Default: `/opt/genome/human/hg19/index/hisat2/hg19` <br>
+```-bed```	| Reference genome annotation file path. Default: `/opt/genome/human/hg19/annotation/hg19.refseq.bed12` <br>
+```-ph```	| Phix genome file path. Default: `/opt/genome/control/phix174/bwa/phiX174.fa` <br>
+```-rib1```	| Ribosomal genome file path. Default: `/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa` <br>
+```-rib2```	| Ribosomal genome file path. Default: `/opt/genome/human/hg19/contam/bwa/humRibosomal.fa` <br>
 ```-t```	| Max thread number. Default: 12. <br>
-```-g```	| GTF file path. Default: human hg19. [`/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf`] <br>
+```-g```	| GTF file path. Default: `/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf` <br>
 ```-a```	| Alignment method. Default: hisat; alternative: tophat. <br>
 ```-l```	| Library type. Default: fr-firststrand; alternative: fr-secondstrand. <br>
 ```-q```	| Quantification method. Default: featureCounts; alternative: Cufflinks. <br>
-```-r```	| Reference genome file path. Default: human hg19. [`/opt/genome/human/hg19/index/hg19.fa`] <br>
+```-r```	| Reference genome file path. Default: `/opt/genome/human/hg19/index/hg19.fa` <br>
 ```-dea```	| Differential Expression Analysis method. Default: edgeR; alternatives: DESeq2, cummeRbund. <br>
 ```-meta``` | Analysis with or without final meta-analysis. Default: full; alternative: quant. <br>
 ```-cat``` | Max number of category showed in R plots for meta-analysis. Default: 5. <br>
