@@ -102,16 +102,6 @@ def checkArgs(args):
         sys.exit()
 
 
-##def checkFile(input_path):
-##    """
-##    Check case/control
-##    """
-##    data=pd.DataFrame.from_csv(input_path,sep=',',index_col=None)
-##    if len(data.loc[data['Type']=='cntrl'])==0 or len(data.loc[data['Type']!='cntrl'])==0:
-##        print ('\033[0;31m' + "\n[AP]\tError while reading files: there must be at least one case and one control.\n\tExit\n" + '\033[0m')
-##        sys.exit()
-        
-
 def checkOptions(q_method,dea_method):
     """
     Check quantification and DEA method options

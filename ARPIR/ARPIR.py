@@ -45,7 +45,7 @@ header = """
 """ 
 
 
-description = "This application makes quality control, pre-processing, alignment, transcript quantification, differential expression analysis and optionaly meta-analysis on BAM files"
+description = "This application makes quality control, pre-processing, alignment, transcript quantification, differential expression analysis and optionaly meta-analysis on FastQ files"
 
 usage_example = """
 Examples of usage:
@@ -63,18 +63,18 @@ parser.add_argument('-sn', '--sample-name', dest="sample_name", help="Sample nam
 parser.add_argument('-r1', '--read1', dest="read1", help="Read 1 fastq path (',' sep). \n No default option. \n", action="store", required=True)
 parser.add_argument('-r2', '--read2', dest="read2", help="Read 2 fastq path (',' sep). \n Default: single-end. \n", action="store", required=False, default="")
 parser.add_argument('-type', '--type', dest="stype", help="Sample types (cntrl,treat). \n No default option. \n", action="store", required=True)
-parser.add_argument('-rb', '--reference-genome-bowtie', dest="ref_bowtie", help="Reference genome file path for bowtie. \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/bowtie2/hg19")
-parser.add_argument('-rh', '--reference-genome-hisat2', dest="ref_hisat2", help="Reference genome file path for hisat2. \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hisat2/hg19")
-parser.add_argument('-bed', '--bed-file', dest="bed_file", help="Reference genome annotation file path. \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refseq.bed12")
-parser.add_argument('-ph', '--phix-genome', dest="phix", help="Phix genome file path. \n Default: Phix. \n", action="store", required=False, default="/opt/genome/control/phix174/bwa/phiX174.fa")
-parser.add_argument('-rib1', '--ribosomal-genome1', dest="rib1", help="Ribosomal genome file path. \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa")
-parser.add_argument('-rib2', '--ribosomal-genome2', dest="rib2", help="Ribosomal genome file path. \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/contam/bwa/humRibosomal.fa")
+parser.add_argument('-rb', '--reference-genome-bowtie', dest="ref_bowtie", help="Reference genome file path for bowtie. \n Default: /opt/genome/human/hg19/index/bowtie2/hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/bowtie2/hg19")
+parser.add_argument('-rh', '--reference-genome-hisat2', dest="ref_hisat2", help="Reference genome file path for hisat2. \n Default: /opt/genome/human/hg19/index/hisat2/hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hisat2/hg19")
+parser.add_argument('-bed', '--bed-file', dest="bed_file", help="Reference genome annotation file path. \n Default: /opt/genome/human/hg19/annotation/hg19.refseq.bed12. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refseq.bed12")
+parser.add_argument('-ph', '--phix-genome', dest="phix", help="Phix genome file path. \n Default: /opt/genome/control/phix174/bwa/phiX174.fa. \n", action="store", required=False, default="/opt/genome/control/phix174/bwa/phiX174.fa")
+parser.add_argument('-rib1', '--ribosomal-genome1', dest="rib1", help="Ribosomal genome file path. \n Default: /opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa. \n", action="store", required=False, default="/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa")
+parser.add_argument('-rib2', '--ribosomal-genome2', dest="rib2", help="Ribosomal genome file path. \n Default: /opt/genome/human/hg19/contam/bwa/humRibosomal.fa. \n", action="store", required=False, default="/opt/genome/human/hg19/contam/bwa/humRibosomal.fa")
 parser.add_argument('-t', '--threads', dest="Threads", help="Max thread number. \n Default: 12. \n", action="store", required=False, default=12)
-parser.add_argument('-g', '--gtf', dest="GTF", help="GTF file path. \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf")
+parser.add_argument('-g', '--gtf', dest="GTF", help="GTF file path. \n Default: /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf")
 parser.add_argument('-a', '--alignment-method', dest="a_method", help="Alignment method. \n Default: hisat; alternative: tophat. \n", action="store", required=False, default="hisat")
 parser.add_argument('-l', '--library-type', dest="library_type", help="Library type. \n Default: fr-firststrand; alternative: fr-secondstrand. \n", action="store", required=False, default="fr-firststrand")
 parser.add_argument('-q', '--quantification-method', dest="q_method", help="Quantification method. \n Default: featureCounts; alternative: Cufflinks. \n", action="store", required=False, default="featureCounts")
-parser.add_argument('-r', '--reference-genome', dest="ref_gen", help="Reference genome file path (only for Cufflinks). \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hg19.fa")
+parser.add_argument('-r', '--reference-genome', dest="ref_gen", help="Reference genome file path (only for Cufflinks). \n Default: /opt/genome/human/hg19/index/hg19.fa. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hg19.fa")
 parser.add_argument('-dea', '--dea-method', dest="dea_method", help="Differential Expression Analysis method. \n Default: edgeR; alternatives: DESeq2, cummeRbund. \n", action="store", required=False, default="edgeR")
 parser.add_argument('-o', '--output-dir', dest="output_dir", help="Output directory. \n No default option. \n", action="store", required=True)
 parser.add_argument('-meta', '--meta-analysis', dest="meta", help="Analysis with or without final meta-analysis. \n Default: full; alternative: quant. \n", action="store", required=False, default="full")

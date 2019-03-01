@@ -34,14 +34,6 @@ function join { local IFS="$1"; shift; echo "$*"; }
 READ1=$(join , ${READ1b[@]})
 READ2=$(join , ${READ2b[@]})
 
-zenity --info --title="Reference genome Bowtie" --text="Select reference genome for Bowtie" --ok-label="OK" 
-REF_BOWTIE=$(zenity --file-selection --filename /opt/genome/human/hg19/index/bowtie2/hg19.fa --title="***Reference genome Bowtie***"  --text="Select reference genome for Bowtie")
-REF_BOWTIE=$(echo $REF_BOWTIE | sed s/.fa//g)
-
-zenity --info --title="Reference genome Hisat2" --text="Select reference genome for Hisat2" --ok-label="OK" 
-REF_HISAT=$(zenity --file-selection --filename /opt/genome/human/hg19/index/hisat2/hg19.fa --title="***Reference genome Hisat2***"  --text="Select reference genome for Hisat2")
-REF_HISAT=$(echo $REF_HISAT | sed s/.fa//g)
-
 zenity --info --title="BED file" --text="Select BED file" --ok-label="OK" 
 BED=$(zenity --file-selection --filename /opt/genome/human/hg19/annotation/hg19.refseq.bed12 --title="***BED file***"  --text="Select BED file")
 
@@ -72,6 +64,14 @@ LOGF=$(zenity --file-selection --directory --filename /opt/ngs/logs --title="***
 library=$(zenity --list --text="Choose library type" --radiolist --column "" --column "Library type" --hide-header --title="Library type" TRUE "fr-firststrand" FALSE "fr-secondstrand")
 
 alignment=$(zenity --list --text="Choose alignment method" --radiolist --column "" --column "Alignment method" --hide-header --title="Alignment method" TRUE "hisat" FALSE "tophat")
+
+zenity --info --title="Reference genome Bowtie" --text="Select reference genome (with indexes) for Bowtie" --ok-label="OK" 
+REF_BOWTIE=$(zenity --file-selection --filename /opt/genome/human/hg19/index/bowtie2/hg19.fa --title="***Reference genome Bowtie***"  --text="Select reference genome for Bowtie")
+REF_BOWTIE=$(echo $REF_BOWTIE | sed s/.fa//g)
+
+zenity --info --title="Reference genome Hisat2" --text="Select reference genome (with indexes) for Hisat2" --ok-label="OK" 
+REF_HISAT=$(zenity --file-selection --filename /opt/genome/human/hg19/index/hisat2/hg19.fa --title="***Reference genome Hisat2***"  --text="Select reference genome for Hisat2")
+REF_HISAT=$(echo $REF_HISAT | sed s/.fa//g)
 
 if [ ${alignment} = "hisat" ]; then
 	quant="featureCounts";
