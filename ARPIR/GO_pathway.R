@@ -29,7 +29,6 @@ table1=table1[table1$logFC!=Inf&table1$logFC!=-Inf,]
 
 library(rlist)
 library(clusterProfiler)
-library(dplyr)
 library(org.Hs.eg.db)
 library(igraph)
 library(scales)
