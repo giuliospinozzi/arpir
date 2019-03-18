@@ -1,8 +1,8 @@
 
 description=$(zenity --forms --title="RNA-Seq project" --text="Assign experiment code (no spaces!)" --add-entry="PROJECT NAME" --add-entry="POOL NAME" --add-entry="SAMPLE NAMES 
 (first the controls,sep by ',')
-[cntrl7,cntrl8,actd10,actd11]" --add-entry="SAMPLE TYPES (sep by ',')
-[cntrl,cntrl,actd,actd]" --add-entry="LOG NAME")
+[cntrl7,cntrl8,treat10,treat11]" --add-entry="SAMPLE TYPES (sep by ',')
+[cntrl,cntrl,treat,treat]" --add-entry="LOG NAME")
 pname=$(echo $description | cut -d'|' -f1)
 poolname=$(echo $description | cut -d'|' -f2)
 snames=$(echo $description | cut -d'|' -f3)
