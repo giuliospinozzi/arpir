@@ -51,10 +51,10 @@
 ------------ | -------------
 ```-n```	| Project name. No default option. <br>
 ```-pn```	| Pool name. No default option. <br>
-```-sn```	| Sample names (',' sep). No default option. <br>
+```-sn```	| Sample names (',' sep, first controls). No default option. <br>
 ```-r1```	| Read 1 fastq path (',' sep). No default option. Files must appear in the same order as sample names. <br>
 ```-r2```	| Read 2 fastq path (',' sep). Required only for paired-end analysis. Files must appear in the same order as sample names. <br>
-```-type```	| Sample types (',' sep, 'cntrl' for control). No default option. Types must appear in the same order as sample names. <br>
+```-type```	| Sample types (',' sep). No default option. Types must appear in the same order as sample names. <br>
 ```-o``` | Output directory. No default option. <br>
 
 #### Options
