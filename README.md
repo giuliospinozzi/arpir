@@ -14,7 +14,7 @@
 *	FastQC 0.11.5
 *	FastQ Screen 0.11.3
 *	bwa 0.7.12-r1039
-*	samtools 0.1.19-96b5f2294a
+*	samtools 1.9
 *	mysql 14.14
 #### For alignment and quality control on BAM files:
 *	TopHat 2.1.1
