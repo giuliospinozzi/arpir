@@ -64,7 +64,7 @@ colnames(diffGenesOutput1)[2:4] <- c("Gene","log2FoldChange","padj")
 diffGenesOutput1 <- diffGenesOutput1[order(diffGenesOutput1$padj), ]
 diffGenesOutput1=na.omit(diffGenesOutput1)
 diffGenesOutput1[diffGenesOutput1$padj==0,c("padj")]=0.1e-320
-write.csv(diffGenesOutput1[,2:10], file="cummeRbund-diffexpr-results.csv")
+write.csv(diffGenesOutput1[,2:ncol(diffGenesOutput1)], file="cummeRbund-diffexpr-results.csv")
 
 # volcano plot
 library(ggrepel)
