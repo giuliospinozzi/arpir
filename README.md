@@ -1,7 +1,7 @@
 # ARPIR (Automatic RNA-Seq Pipelines with Interactive Report)
 
 ## Introduction
-<p align="justify"> This application makes RNA-Seq analysis: quality control, pre-processing, alignment, transcript quantification and differential expression analysis on BAM files. Given the input files and the working directory, the pipeline is completely automated. First, quality control on fastq files is performed with FastQC e FastQ Screen. FastQC makes quality control and creates one report for sample. FastQ Screen estimates approximately the percentage of reads that can be mapped on genomes other than human, like ribosomal genome, phix genome and mouse genome. This allows to evaluate the presence of contaminating genomes. Pre-processing follows quality control: the reads are aligned on phix genome and ribosomal genome to eliminate contaminations. Alignment can be performed with TopHat or HISAT2; in the first case quantification is performed with Cufflinks and DEA with cummeRbund, in the second case quantification is performed with featureCounts and DEA with DESeq2 or edgeR. A second intermediate quality control analysis is also performed on the aligned BAM files with some of the RSeQC scripts and in particular: inner_distance, junction_annotation, junction_saturation, bam_stat, read_distribution, geneBody_coverage. It is possible to perform an optional meta-analysis on the results. It consists in Gene Ontology enrichment analysis and KEGG Pathway enrichment analysis on the differentially expressed genes (with absolute Fold Change value higher than 1.5 and adjusted p-value lower than 0.05). </p>
+<p align="justify"> ARPIR makes RNA-Seq analysis: quality control, pre-processing, alignment, transcript quantification and differential expression analysis on BAM files. Given the input files and the working directory, the pipeline is completely automated. First, quality control on fastq files is performed with FastQC e FastQ Screen. FastQC makes quality control and creates one report for sample. FastQ Screen estimates approximately the percentage of reads that can be mapped on genomes other than human, like ribosomal genome, phix genome and mouse genome. This allows to evaluate the presence of contaminating genomes. Pre-processing follows quality control: the reads are aligned on phix genome and ribosomal genome to eliminate contaminations. Alignment can be performed with TopHat or HISAT2; in the first case quantification is performed with Cufflinks and DEA with cummeRbund, in the second case quantification is performed with featureCounts and DEA with DESeq2 or edgeR. A second intermediate quality control analysis is also performed on the aligned BAM files with some of the RSeQC scripts and in particular: inner_distance, junction_annotation, junction_saturation, bam_stat, read_distribution, geneBody_coverage. It is possible to perform an optional meta-analysis on the results. It consists in Gene Ontology enrichment analysis and KEGG Pathway enrichment analysis on the differentially expressed genes (with absolute Fold Change value higher than 1.5 and adjusted p-value lower than 0.05). </p>
 
 ## Prerequisites
 ### Applications
@@ -49,13 +49,13 @@
 #### Arguments
 | | |
 ------------ | -------------
-```-n```	| Project name. No default option. <br>
-```-pn```	| Pool name. No default option. <br>
-```-sn```	| Sample names (',' sep, first controls). No default option. <br>
-```-r1```	| Read 1 fastq path (',' sep). No default option. Files must appear in the same order as sample names. <br>
+```-n```	| Project name. No default options. <br>
+```-pn```	| Pool name. No default options. <br>
+```-sn```	| Sample names (',' sep, first controls). No default options. <br>
+```-r1```	| Read 1 fastq path (',' sep). No default options. Files must appear in the same order as sample names. <br>
 ```-r2```	| Read 2 fastq path (',' sep). Required only for paired-end analysis. Files must appear in the same order as sample names. <br>
-```-type```	| Sample types (',' sep). No default option. Types must appear in the same order as sample names. <br>
-```-o``` | Output directory. No default option. <br>
+```-type```	| Sample types (',' sep). No default options. Types must appear in the same order as sample names. <br>
+```-o``` | Output directory. No default options. <br>
 
 #### Options
 | | |
@@ -74,7 +74,7 @@
 ```-r```	| Reference genome file path. Default: `/opt/genome/human/hg19/index/hg19.fa` <br>
 ```-dea```	| Differential Expression Analysis method. Default: edgeR; alternatives: DESeq2, cummeRbund. <br>
 ```-meta``` | Analysis with or without final meta-analysis. Default: full; alternative: quant. <br>
-```-cat``` | Max number of category showed in R plots for meta-analysis. Default: 5. <br>
+```-cat``` | Max number of categories showed in R plots for meta-analysis. Default: 5. <br>
 
 ### Graphical User Interface
 #### Usage
