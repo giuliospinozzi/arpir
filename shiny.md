@@ -20,7 +20,7 @@
 
 ## Differential expression analysis
 <p align="center"><img src="/images/shiny4_DEA.png" width="100%"></p>
-<p align="justify"> For the differential expression analysis, a summary table with the results and FPKM values for each sample is given. Then follows a series of summary plots and in particular: a PCA to evaluate the differences between the samples; a volcano plot, which reports the values of Fold Change and p-value for all genes; a heatmap of the 35 genes with greater variance, in which the value of the Z-score is reported and therefore the distance from the mean for the various samples; a heatmap showing the distances between the samples, calculated in a distance matrix using the euclidean distance method. </p>
+<p align="justify"> For the differential expression analysis, a summary table with the results and FPKM values for each sample is given. Then follows a series of summary plots and in particular: a PCA to evaluate the differences between the samples; a volcano plot, which reports the values of Fold Change and p-value for all genes; a heatmap of the 100 genes with greater variance, in which the value of the Z-score is reported and therefore the distance from the mean for the various samples; a heatmap showing the distances between the samples, calculated in a distance matrix using the euclidean distance method. </p>
 
 ## Meta-analysis
 ### GO analysis
