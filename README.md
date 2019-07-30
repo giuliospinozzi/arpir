@@ -105,13 +105,13 @@ In the case of HISAT, instead, the necessary command is:<br>
 ```bash /path/to/script/ARPIR/GUI_ARPIR.sh ``` <br>
 <p align="justify"> A first window will appear in which you will be asked to enter the data relating to the experiment, as in the example below.</p>
 
-<p align="center"><img src="/images/GUI_screenshot.png" width="55%"></p>
+<p align="center"><img src="/images/GUI_screenshot1.png" width="55%"></p>
 
 <p align="justify"> This is followed by a series of windows that allow you to choose between different options or ask to select the input files or folders, as shown in the following two images.</p>
 
-<p align="center"><img src="/images/GUI_screenshot.png" width="55%"></p>
+<p align="center"><img src="/images/GUI_screenshot2.png" width="45%"></p>
 
-<p align="center"><img src="/images/GUI_screenshot.png" width="55%"></p>
+<p align="center"><img src="/images/GUI_screenshot3.png" width="25%"></p>
 
 <p align="justify"> If they exist, the default paths will be shown automatically. Finally, once all the inputs and the parameters have been selected, a summary window will appear. If the data entered are correct, it will be sufficient to confirm to start the analysis, otherwise it is possible to cancel and start from the beginning.</p>
 
