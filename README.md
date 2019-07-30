@@ -1,41 +1,56 @@
 # ARPIR (Automatic RNA-Seq Pipelines with Interactive Report)
 
 ## Introduction
-<p align="justify"> ARPIR makes RNA-Seq analysis: quality control, pre-processing, alignment, transcript quantification and differential expression analysis on BAM files. Given the input files and the working directory, the pipeline is completely automated. First, quality control on fastq files is performed with FastQC e FastQ Screen. FastQC makes quality control and creates one report for sample. FastQ Screen estimates approximately the percentage of reads that can be mapped on genomes other than human, like ribosomal genome, phix genome and mouse genome. This allows to evaluate the presence of contaminating genomes. Pre-processing follows quality control: the reads are aligned on phix genome and ribosomal genome to eliminate contaminations. Alignment can be performed with TopHat or HISAT2; in the first case quantification is performed with Cufflinks and DEA with cummeRbund, in the second case quantification is performed with featureCounts and DEA with DESeq2 or edgeR. A second intermediate quality control analysis is also performed on the aligned BAM files with some of the RSeQC scripts and in particular: inner_distance, junction_annotation, junction_saturation, bam_stat, read_distribution, geneBody_coverage. It is possible to perform an optional meta-analysis on the results. It consists in Gene Ontology enrichment analysis and KEGG Pathway enrichment analysis on the differentially expressed genes (with absolute Fold Change value higher than 1.5 and adjusted p-value lower than 0.05). </p>
+<p align="justify"> ARPIR makes RNA-Seq analysis: quality control, pre-processing, alignment, transcript quantification and differential expression analysis on BAM files. Given the input files and the working directory, the pipeline is completely automated. First, quality control on FastQ files is performed with FastQC e FastQ Screen. FastQC makes quality control and creates one report for sample. FastQ Screen estimates approximately the percentage of reads that can be mapped on genomes other than human, like ribosomal genomes, PhiX genome and mouse genome. This allows to evaluate the presence of contaminating genomes. Pre-processing follows quality control: the reads are aligned on PhiX genome and ribosomal genome to eliminate contaminations. Alignment can be performed with TopHat2 or HISAT2; in the first case quantification is performed with Cufflinks and DEA with cummeRbund, in the second case quantification is performed with featureCounts and DEA with DESeq2 or edgeR. A second intermediate quality control analysis is also performed on the aligned BAM files with some of the RSeQC scripts and in particular: inner_distance, junction_annotation, junction_saturation, bam_stat, read_distribution, geneBody_coverage. It is possible to perform an optional meta-analysis on the results. It consists in Gene Ontology enrichment analysis and KEGG Pathway enrichment analysis on the differentially expressed genes (with absolute Fold Change value higher than 1.5 and adjusted p-value lower than 0.05). </p>
 
 ## Prerequisites
+<p align="justify"> For ARPIR to work properly, you must first make sure that you have installed the necessary applications for the pipeline. </p>
+
 ### Applications
 #### For Graphical User Interface and scripts running:
-*	zenity 3.18.1.1
-*	Python 2.7.12 (modules: os, argparse, sys, csv, pandas)
-*	R 3.4.3 (packages: cummeRbund, edgeR, DESeq2, ggfortify, ggrepel, genefilter, RColorBrewer, gplots, clusterProfiler, dplyr, org.Hs.eg.db, igraph, scales, treemap, pathview, shiny, DT, magick, rlist, visNetwork, shinyjs, knitr)
-* pandoc
+*	zenity 3.18.1.1 (https://help.gnome.org/users/zenity/)
+*	Python 2.7.12 (modules: os, argparse, sys, csv, pandas) (https://www.python.org/downloads/)
+*	R 3.4.3 (packages: cummeRbund, edgeR, DESeq2, ggfortify, ggrepel, genefilter, RColorBrewer, gplots, clusterProfiler, dplyr, org.Hs.eg.db, igraph, scales, treemap, pathview, shiny, DT, magick, rlist, visNetwork, shinyjs, knitr) (https://www.r-project.org/)
+* pandoc (https://pandoc.org/)
 #### For quality control on fastq files and pre-processing:
-*	FastQC 0.11.5
-*	FastQ Screen 0.11.3
-*	bwa 0.7.12-r1039
-*	samtools 1.9
-*	mysql 14.14
+*	FastQC 0.11.5 (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+*	FastQ Screen 0.11.3 (https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/)
+*	bwa 0.7.12-r1039 (http://bio-bwa.sourceforge.net/)
+*	samtools 1.9 (http://samtools.sourceforge.net/)
 #### For alignment and quality control on BAM files:
-*	TopHat 2.1.1
-*	RSeQC 2.6.4
-*	HISAT 2.1.0
+*	TopHat 2.1.1 (https://ccb.jhu.edu/software/tophat/index.shtml)
+*	RSeQC 2.6.4 (http://rseqc.sourceforge.net/)
+*	HISAT 2.1.0 (https://ccb.jhu.edu/software/hisat2/index.shtml)
 #### For quantification:
-*	featureCounts 1.5.3
-*	Cufflinks 2.2.1
+*	featureCounts 1.5.3 (http://subread.sourceforge.net/)
+*	Cufflinks 2.2.1 (http://cole-trapnell-lab.github.io/cufflinks/)
 ### Input files
-*	<p align="justify">Fastq files of the samples. Since this is a differential analysis, at least two case and two control must be present, furthermore if it is a paired-end analysis files of read 1 and read 2 must be provided for each sample while if it is a single-end analysis only files of read 1 must be provided.</p>
-*	<p align="justify">Reference genome for Bowtie with relative indexes, necessary for alignment with TopHat. The path in which the file with its indices is searched by default is as follows: /opt/genome/human/hg19/index/bowtie2/hg19.</p>
-*	<p align="justify">Reference genome for Hisat2 with relative indexes, necessary for alignment with HISAT2. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/index/hisat2/hg19.</p>
+The necessary input files are as follows:
+*	<p align="justify">FastQ files of the samples. Since this is a differential analysis, at least two cases and two controls must be present, furthermore, if it is a paired-end analysis, files of read 1 and read 2 must be provided for each sample while if it is a single-end analysis only files of read 1 must be provided.</p>
+*	<p align="justify">Reference genome for Bowtie2 with relative indexes, necessary for alignment with TopHat2. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/index/bowtie2/hg19. It is not necessary to report the extension, but only the name of the file and the indexes must be present in the same folder.</p>
+*	<p align="justify">Reference genome with relative indexes, necessary for alignment with HISAT2. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/index/hisat2/hg19. The reference genome file is the same as TopHat, but the indexes are obtained differently (see below).</p>
 *	<p align="justify">BED file, necessary for quality control on BAM files. The path in which the file is searched by default is as follows: /opt/genome/human/hg19/annotation/hg19.refseq.bed12.</p>
-*	<p align="justify">Phix genome with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/control/phix174/bwa/phiX174.fa.</p>
-*	<p align="justify">Ribosomal genome 1 with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa.</p>
-*	<p align="justify">Ribosomal genome 2 with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/humRibosomal.fa.</p>
-*	<p align="justify">GTF file, necessary for alignment with TopHat and quantification with featureCounts and Cufflinks. The path in which the file is searched by default is as follows: /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf. </p>
-*	<p align="justify">Reference genome with relative indexes, necessary for quantification with Cufflinks. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/index/hg19.fa. </p>
+*	<p align="justify">PhiX genome with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/control/phix174/bwa/phiX174.fa.</p>
+*	<p align="justify">Ribosomal genome 5s with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa.</p>
+*	<p align="justify">Ribosomal genome with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/humRibosomal.fa.</p>
+*	<p align="justify">GTF file, necessary for alignment with TopHat2 and quantification with featureCounts and Cufflinks. The path in which the file is searched by default is as follows: /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf.</p>
+*	<p align="justify">Reference genome with relative indexes, necessary for quantification with Cufflinks. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/index/hg19.fa. The reference genome file is the same, but the indexes change. </p>
+<p align="justify"> Illumina makes genome and annotation files available for various organisms, which can be downloaded at the following link: ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/. In addition to the Fasta file of the genome, the folder also contains indexes for different aligners and annotation files. </p>
+
+#### Creating indexes:
+<p align="justify"> The indexes can be created starting from the Fasta file and require different commands based on the alignment software for which they will be used.</p>
+In the case of TopHat, the necessary command is the following:<br>
+
+```bowtie2-build file.fa file``` <br>
+
+In the case of HISAT, instead, the necessary command is:<br>
+
+```hisat2-build file.fa file``` 
 
 ## Running application
 ### Command line
+<p align="justify"> After installing the necessary tools and getting the required input files, you can launch the application using command-line. The following is the use for analysis in single-end and paired-end, with the arguments that must necessarily be inserted, as they do not provide default options, and the optional arguments, which can be omitted if the paths and options you want match the standard ones.</p>
+
 #### Usage
 
 #### Paired-end
@@ -76,12 +91,29 @@
 ```-meta``` | Analysis with or without final meta-analysis. Default: full; alternative: quant. <br>
 ```-cat``` | Max number of categories showed in R plots for meta-analysis. Default: 5. <br>
 
+#### Example
+<p align="justify"> Below is an example of use for a paired end analysis with the edgeR pipeline.</p>
+
+```python ARPIR/ARPIR.py -n Project_01 -pn Simulation -sn sample_01,sample_02,sample_03,sample_04,sample_05,sample_06 -r1 /opt/ngs/Simulation/sample_01_1.fastq.gz,/opt/ngs/Simulation/sample_02_1.fastq.gz,/opt/ngs/Simulation/sample_03_1.fastq.gz,/opt/ngs/Simulation/sample_04_1.fastq.gz,/opt/ngs/Simulation/sample_05_1.fastq.gz,/opt/ngs/Simulation/sample_06_1.fastq.gz -r2 /opt/ngs/Simulation/sample_01_2.fastq.gz,/opt/ngs/Simulation/sample_02_2.fastq.gz,/opt/ngs/Simulation/sample_03_2.fastq.gz,/opt/ngs/Simulation/sample_04_2.fastq.gz,/opt/ngs/Simulation/sample_05_2.fastq.gz,/opt/ngs/Simulation/sample_06_2.fastq.gz -type cntrl,cntrl,cntrl,treat,treat,treat -o /opt/ngs -rb /opt/genome/human/hg19/index/bowtie2/hg19 -rh /opt/genome/human/hg19/index/hisat2/hg19 -bed /opt/genome/human/hg19/annotation/hg19.refseq.bed12 -ph /opt/genome/control/phix174/bwa/phiX174.fa -rib1 /opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa -rib2 /opt/genome/human/hg19/contam/bwa/humRibosomal.fa -t 12 -g /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf -a hisat -l fr-firststrand -q featureCounts -r /opt/genome/human/hg19/index/hg19.fa -dea edgeR -meta full -cat 5```
+
 ### Graphical User Interface
 #### Usage
 ```bash GUI_ARPIR.sh``` <br>
-A series of windows allow to indicate input files and to choose between various options.
+<p align="justify"> A series of windows allow to indicate input files and to choose between various options.</p>
+
+#### Example
+```bash /path/to/script/ARPIR/GUI_ARPIR.sh ``` <br>
+<p align="justify"> A first window will appear in which you will be asked to enter the data relating to the experiment, as in the example below.</p>
 
 <p align="center"><img src="/images/GUI_screenshot.png" width="55%"></p>
+
+<p align="justify"> This is followed by a series of windows that allow you to choose between different options or ask to select the input files or folders, as shown in the following two images.</p>
+
+<p align="center"><img src="/images/GUI_screenshot.png" width="55%"></p>
+
+<p align="center"><img src="/images/GUI_screenshot.png" width="55%"></p>
+
+<p align="justify"> If they exist, the default paths will be shown automatically. Finally, once all the inputs and the parameters have been selected, a summary window will appear. If the data entered are correct, it will be sufficient to confirm to start the analysis, otherwise it is possible to cancel and start from the beginning.</p>
 
 ### Shiny app
 To observe the results of the analysis in an interactive form, it is possible to launch a [shiny app](shiny.md).
