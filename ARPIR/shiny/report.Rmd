@@ -3,10 +3,13 @@ title: "RNA-Seq analysis"
 output:
   word_document: 
     toc: true
+    toc_depth: 3
   pdf_document: 
     toc: true
+    toc_depth: 3
   html_document: 
     toc: true
+    toc_depth: 3
 params:
   out_dir: NA
 ---
@@ -23,6 +26,7 @@ knitr::opts_chunk$set(echo = F)
 library(knitr)
 out_dir=params$out_dir
 gen_sum=read.csv(paste0(out_dir,"/reports/general_report.csv"),sep="\t",header = F,row.names = 1)
+comp=strsplit(as.character(gen_sum[7,1]),",")[[1]]
 kable(gen_sum,col.names = "Summary table")
 ```
 
@@ -46,6 +50,7 @@ The numbers of raw reads and reads removed in the various steps are as follows:
 
 ```{r comment="", results='asis'}
 sam_sum=read.csv(paste0(out_dir,"/reports/sample_report.csv"),sep="\t",header = T)
+colnames(sam_sum)[3:6]=c("raw_reads","phix_reads","ribosomal_reads","mapped_reads")
 kable(sam_sum)
 ```
 
@@ -84,6 +89,7 @@ for (i in 1:length(sam)) {
     cat("\n\n")
   }
 }
+
 ```
 
 \pagebreak
@@ -114,7 +120,7 @@ The quality of the BAM files was evaluated using RSeQC software, using a series 
 
 The following are some of the outputs obtained for the various samples. In the first table are reported statistics related to the reads mapping, in the second table are reported reads fractions mapped on the coding exon part, on the 5'-UTR region, on the 3'-UTR region and on the intronic or intragenic regions, the final image shows the distribution of the internal distance between paired reads.
 
-```{r comment="", fig.align='center', out.width = "90%", dpi = 500}
+```{r comment="", fig.align='center', out.width = "90%", out.height="90%", dpi = 500}
 
 processFile = function(filepath,title) {
   cat(title,"\n")
@@ -194,26 +200,30 @@ Outputs consist of a matrix with differential expression results, a PCA, a volca
 
 
 
-```{r fig.align='center', out.width = "90%", dpi = 500}
-pca=image_read_pdf(list.files(path=paste0(out_dir,"/Quantification_and_DEA"),
-                          pattern = "-pca.pdf",
+```{r comment="", results='asis', fig.align='center', message=FALSE, out.width = "100%", out.height="100%", dpi=500}
+for (i in 1:length(comp)) {
+  cat(paste0("\n\n##",comp[i]),"\n\n\n")
+  pca=image_read(list.files(path=paste0(out_dir,"/",comp[i],"/Quantification_and_DEA"),
+                          pattern = "-pca.png",
                           full.names = T))
-print(pca)
-cat("\n\n")
-volcano=image_read_pdf(list.files(path=paste0(out_dir,"/Quantification_and_DEA"),
+  plot(pca)
+  cat("\n\n")
+  volcano=image_read_pdf(list.files(path=paste0(out_dir,"/",comp[i],"/Quantification_and_DEA"),
                               pattern = "-volcanoplot.pdf",
                               full.names = T))
-print(volcano)
-cat("\n\n")
-heat1=image_read_pdf(list.files(path=paste0(out_dir,"/Quantification_and_DEA"),
-                            pattern = "-heatmap-topVarGenes.pdf",
+  plot(volcano)
+  cat("\n\n")
+  heat1=image_read(list.files(path=paste0(out_dir,"/",comp[i],"/Quantification_and_DEA"),
+                            pattern = "-heatmap-topVarGenes.png",
                             full.names = T))
-print(heat1)
-cat("\n\n")
-heat2=image_read_pdf(list.files(path=paste0(out_dir,"/Quantification_and_DEA"),
-                            pattern = "-heatmap-samples.pdf",
+  plot(heat1)
+  cat("\n\n")
+  heat2=image_read(list.files(path=paste0(out_dir,"/",comp[i],"/Quantification_and_DEA"),
+                            pattern = "-heatmap-samples.png",
                             full.names = T))
-print(heat2)
+  plot(heat2)
+
+}
 
 ```
 
@@ -221,7 +231,7 @@ print(heat2)
 
 ```{r comment="", results='asis'}
 
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
+if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
   
 cat("# Meta-analysis
 
@@ -234,52 +244,42 @@ The outputs obtained are a treemap, three cnetplot and three dotplot (one for GO
 ")}
 ```
 
-```{r fig.align='center', out.width = "100%", dpi = 500}
+```{r comment="", results='asis', fig.align='center', message=FALSE, out.width = "100%", out.height="100%", dpi = 500}
 
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
+if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
 
-tree=image_read_pdf(paste0(out_dir,"/Meta-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.pdf"))
-print(tree)
-}
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
-
-dotp=list.files(path=paste0(out_dir,"/Meta-analysis/Gene_ontology"),
+  for (i in 1:length(comp)) {
+    cat(paste0("\n\n###",comp[i]),"\n\n\n")
+    if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.png"))) {
+      tree=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.pdf"))
+      plot(tree)
+    }
+    dotp=list.files(path=paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology"),
                             pattern = "dotplot_GO_.*\\.pdf",
                             full.names = T)
-dot_go=list()
-for (i in 1:length(dotp)) {
-  dot_go=list.append(dot_go,image_read_pdf(dotp[i]))
-}
-print(dot_go[[1]])
-}
-
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
-if (length(dot_go)>1) {print(dot_go[[2]])}}
-
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
-if (length(dot_go)>2) {print(dot_go[[3]])}}
-
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
-cnetp=list.files(path=paste0(out_dir,"/Meta-analysis/Gene_ontology"),
+    if (length(dotp)>0) {
+      for (j in 1:length(dotp)) {
+        dot_go=image_read_pdf(dotp[j])
+        plot(dot_go)
+      }
+    }
+    cnetp=list.files(path=paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology"),
                             pattern = "cnetplot_GO_.*\\.pdf",
                             full.names = T)
-cnet_go=list()
-for (i in 1:length(cnetp)) {
-  cnet_go=list.append(cnet_go,image_read_pdf(cnetp[i]))
+    if (length(cnetp)>0) {
+      for (j in 1:length(cnetp)) {
+        cnet_go=image_read_pdf(cnetp[j])
+        plot(cnet_go)
+      }
+    }
+  }
 }
-print(cnet_go[[1]])}
 
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
-if (length(cnet_go)>1) {print(cnet_go[[2]])}}
-
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
-if (length(cnet_go)>2) {print(cnet_go[[3]])}
-}
 ```
 
 ```{r comment="", results='asis'}
 
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
+if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
   
 cat("## Pathway analysis
 
@@ -290,14 +290,20 @@ The outputs obtained are a dotplot and a cnetplot. In both are shown the five mo
 ")}
 ```
 
-```{r fig.align='center', out.width = "100%", dpi = 500}
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
-dot=image_read_pdf(paste0(out_dir,"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))
-print(dot)}
-
-if (file.exists(paste0(out_dir,"/Meta-analysis"))) {
-cnet_path=image_read_pdf(paste0(out_dir,"/Meta-analysis/Pathway_analysis/cnetplot_pathways.pdf"))
-print(cnet_path)}
+```{r comment="", results='asis', fig.align='center', message=FALSE, out.width = "100%", dpi = 500}
+if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
+  for (i in 1:length(comp)) {
+    cat(paste0("\n\n###",comp[i]),"\n\n\n")
+    if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/dotplot_pathways.png"))) {
+      dot=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))
+      plot(dot)
+    }
+    if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/cnetplot_pathways.png"))) {
+      cnet_path=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/cnetplot_pathways.pdf"))
+      plot(cnet_path)
+    }
+  }
+}
 ```
 
 \pagebreak

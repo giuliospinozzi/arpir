@@ -31,7 +31,8 @@ header = """
   -l, --library-type [fr-firststrand,fr-secondstrand]
   -r, --reference-genome [/opt/genome/human/hg19/index/hg19.fa]
   -dea, --dea-method [edgeR,DESeq2,cummeRbund]
-  -script_path, --script_path [/opt/applications/src/arpir/ARPIR]
+  -r_path, --r_path [/opt/applications/src/arpir/ARPIR]
+  -comp, --comparisons
   
 """ 
 
@@ -50,13 +51,14 @@ print header, description, usage_example
 parser = argparse.ArgumentParser(usage = usage_example, epilog = "[ Transcript quantification and DEA analysis on BAM files ] \n", description = description)
 parser.add_argument('-t', '--threads', dest="Threads", help="Max thread number. \n Default: 12. \n", action="store", required=False, default=12)
 parser.add_argument('-i', '--input', dest="input_path", help="Input path dataframe. \n No default option. \n", action="store", required=True)
-parser.add_argument('-g', '--gtf', dest="GTF", help="GTF file path. \n Defaul: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf")
+parser.add_argument('-g', '--gtf', dest="GTF", help="GTF file path. \n Defaul: /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf")
 parser.add_argument('-q', '--quantification-method', dest="q_method", help="Quantification method. \n Defaul: featureCounts; alternative: Cufflinks. \n", action="store", required=False, default="featureCounts")
 parser.add_argument('-o', '--output-dir', dest="output_dir", help="Output directory. \n No default option. \n", action="store", required=True)
 parser.add_argument('-l', '--library-type', dest="library_type", help="Library type (only for Cufflinks). \n Defaul: fr-firststrand; alternative: fr-secondstrand. \n", action="store", required=False, default="fr-firststrand")
-parser.add_argument('-r', '--reference-genome', dest="ref_gen", help="Reference genome file path (only for Cufflinks). \n Defaul: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hg19.fa")
+parser.add_argument('-r', '--reference-genome', dest="ref_gen", help="Reference genome file path (only for Cufflinks). \n Defaul: /opt/genome/human/hg19/index/hg19.fa. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hg19.fa")
 parser.add_argument('-dea', '--dea-method', dest="dea_method", help="Differential Expression Analysis method. \n Default: edgeR; alternatives: DESeq2, cummeRbund. \n", action="store", required=False, default="edgeR")
-parser.add_argument('-script_path', '--script_path', dest="script_path", help="R script directory. \n Default: /opt/applications/src/arpir/ARPIR. \n", action="store", required=False, default="/opt/applications/src/arpir/ARPIR")
+parser.add_argument('-r_path', '--r_path', dest="R_path", help="R script directory. \n Default: /opt/applications/src/arpir/ARPIR. \n", action="store", required=False, default="/opt/applications/src/arpir/ARPIR")
+parser.add_argument('-comp', '--comparisons', dest="comp", help="Comparisons (cntrl_VS_treat1). \n No default option. \n", action="store", required=True)
 
 args = parser.parse_args()
 
@@ -81,7 +83,8 @@ def checkArgs(args):
     print "library_type =", args.library_type
     print "reference_genome =", args.ref_gen
     print "DEA method =", args.dea_method
-    print "R script path =", args.script_path
+    print "R script path =", args.R_path
+    print "Comparisons =", args.comp
     if not os.path.isfile(args.input_path):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid path for input file.\n\tExit\n" + '\033[0m')
         sys.exit()
@@ -94,13 +97,23 @@ def checkArgs(args):
     if not os.path.isfile(args.ref_gen):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid path for reference genome.\n\tExit\n" + '\033[0m')
         sys.exit()
-    script_path1=args.script_path+"/runedgeR.R"
-    script_path2=args.script_path+"/runDESeq2.R"
-    script_path3=args.script_path+"/runcummeRbund.R"
-    if not os.path.isfile(script_path1) or not os.path.isfile(script_path2) or not os.path.isfile(script_path3):
+    R_path1=args.R_path+"/runedgeR.R"
+    R_path2=args.R_path+"/runDESeq2.R"
+    R_path3=args.R_path+"/runcummeRbund.R"
+    if not os.path.isfile(R_path1) or not os.path.isfile(R_path2) or not os.path.isfile(R_path3):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no R scripts.\n\tExit\n" + '\033[0m')
         sys.exit()
 
+
+##def checkFile(input_path):
+##    """
+##    Check case/control
+##    """
+##    data=pd.DataFrame.from_csv(input_path,sep=',',index_col=None)
+##    if len(data.loc[data['Type']=='cntrl'])==0 or len(data.loc[data['Type']!='cntrl'])==0:
+##        print ('\033[0;31m' + "\n[AP]\tError while reading files: there must be at least one case and one control.\n\tExit\n" + '\033[0m')
+##        sys.exit()
+        
 
 def checkOptions(q_method,dea_method):
     """
@@ -128,7 +141,7 @@ def runfeatureCounts(Threads,input_path,GTF,output_dir):
     os.system(cmd)
 
 
-def runCufflinks(Threads,input_path,GTF,output_dir,library_type,ref_gen):
+def runCufflinks(Threads,input_path,GTF,output_dir,library_type,ref_gen,comp):
     """
     Run Cufflinks as desired
     """
@@ -148,12 +161,12 @@ def runCufflinks(Threads,input_path,GTF,output_dir,library_type,ref_gen):
     os.system(cmd2)
 
     print ('\033[0;32m' + "\n############## Cuffquant ###################\n" + '\033[0m')
-    for i in range(1, (len(data)+1)):
-        cmd3="cuffquant -p "+str(Threads)+" --library-type "+library_type+" --no-update-check -o "+output_dir+"/"+data['sample_name'][i-1]+"/cuffquant "+output_dir+"/merged.gtf "+data['BAM_path'][i-1]
+    for j in range(1, (len(data)+1)):
+        cmd3="cuffquant -p "+str(Threads)+" --library-type "+library_type+" --no-update-check -o "+output_dir+"/"+data['sample_name'][j-1]+"/cuffquant "+output_dir+"/merged.gtf "+data['BAM_path'][j-1]
         os.system(cmd3)
 
-    cntrl=data.loc[data['Type']==list(set(data['Type']))[0]]
-    treat=data.loc[data['Type']==list(set(data['Type']))[1]]
+    cntrl=data.loc[data['Type']==comp.split("_VS_")[0]]
+    treat=data.loc[data['Type']==comp.split("_VS_")[1]]
     treat = treat.reset_index(drop=True)
     cntrl = cntrl.reset_index(drop=True)
     a=[]
@@ -174,30 +187,30 @@ def runCufflinks(Threads,input_path,GTF,output_dir,library_type,ref_gen):
     os.system(cmd4)
 
 
-def runedgeR(input_path,output_dir,script_path):
+def runedgeR(input_path,output_dir,R_path,comp):
     """
     Run edgeR as desired
     """
     print ('\033[1;33m' + "\n^^^^^^^^^edgeR running^^^^^^^^^\n" + '\033[0m')
-    cmd5="Rscript --vanilla --verbose "+script_path+"/runedgeR.R "+output_dir+"/featureCounts_counts.txt "+input_path+" "+output_dir
+    cmd5="Rscript --vanilla --verbose "+R_path+"/runedgeR.R "+output_dir+"/featureCounts_counts.txt "+input_path+" "+output_dir+" "+comp
     os.system(cmd5)
 
 
-def runDESeq2(input_path,output_dir,script_path):
+def runDESeq2(input_path,output_dir,R_path,comp):
     """
     Run DESeq2 as desired
     """
     print ('\033[1;33m' + "\n^^^^^^^^^DESeq2 running^^^^^^^^^\n" + '\033[0m')
-    cmd6="Rscript --vanilla --verbose "+script_path+"/runDESeq2.R "+output_dir+"/featureCounts_counts.txt "+input_path+" "+output_dir
+    cmd6="Rscript --vanilla --verbose "+R_path+"/runDESeq2.R "+output_dir+"/featureCounts_counts.txt "+input_path+" "+output_dir+" "+comp
     os.system(cmd6)
 
 
-def runcummeRbund(input_path,output_dir,script_path):
+def runcummeRbund(input_path,output_dir,R_path):
     """
     Run cummeRbund as desired
     """
     print ('\033[1;33m' + "\n^^^^^^^^^cummeRbund running^^^^^^^^^\n" + '\033[0m')
-    cmd7="Rscript --vanilla --verbose "+script_path+"/runcummeRbund.R "+output_dir+"/cuffdiff "+input_path+" "+output_dir
+    cmd7="Rscript --vanilla --verbose "+R_path+"/runcummeRbund.R "+output_dir+"/cuffdiff "+input_path+" "+output_dir
     os.system(cmd7)
 
 
@@ -220,19 +233,19 @@ def main():
 
     # if quantification method is Cufflinks
     if args.q_method == 'Cufflinks':
-        runCufflinks(args.Threads,args.input_path,args.GTF,args.output_dir,args.library_type,args.ref_gen)
+        runCufflinks(args.Threads,args.input_path,args.GTF,args.output_dir,args.library_type,args.ref_gen,args.comp)
     
     # if DEA method is edgeR
     if args.dea_method == 'edgeR':
-        runedgeR(args.input_path,args.output_dir,args.script_path)
+        runedgeR(args.input_path,args.output_dir,args.R_path,args.comp)
         
     # if DEA method is DESeq2
     if args.dea_method == 'DESeq2':
-        runDESeq2(args.input_path,args.output_dir,args.script_path)
+        runDESeq2(args.input_path,args.output_dir,args.R_path,args.comp)
 
     # if DEA method is cummeRbund
     if args.dea_method == 'cummeRbund':
-        runcummeRbund(args.input_path,args.output_dir,args.script_path)
+        runcummeRbund(args.input_path,args.output_dir,args.R_path)
 
 
 # sentinel

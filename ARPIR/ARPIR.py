@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os, argparse, sys, csv
+import pandas as pd
 
 header = """
   +--------------------------------------------------------+
@@ -38,9 +39,11 @@ header = """
   -q, --quantification-method [featureCounts,Cufflinks]
   -r, --reference-genome [/opt/genome/human/hg19/index/hg19.fa]
   -dea, --dea-method [edgeR,DESeq2,cummeRbund]
+  -r_path, --r_path [/opt/applications/src/arpir/ARPIR]
   -o, --output-dir
   -meta, --meta-analysis [full,quant]
   -cat, --max-cat [5]
+  -comp, --comparisons
   
 """ 
 
@@ -73,12 +76,15 @@ parser.add_argument('-t', '--threads', dest="Threads", help="Max thread number. 
 parser.add_argument('-g', '--gtf', dest="GTF", help="GTF file path. \n Default: /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf")
 parser.add_argument('-a', '--alignment-method', dest="a_method", help="Alignment method. \n Default: hisat; alternative: tophat. \n", action="store", required=False, default="hisat")
 parser.add_argument('-l', '--library-type', dest="library_type", help="Library type. \n Default: fr-firststrand; alternative: fr-secondstrand. \n", action="store", required=False, default="fr-firststrand")
+#parser.add_argument('-i', '--input', dest="input_path", help="Input path dataframe. \n No default option. \n", action="store", required=True)
 parser.add_argument('-q', '--quantification-method', dest="q_method", help="Quantification method. \n Default: featureCounts; alternative: Cufflinks. \n", action="store", required=False, default="featureCounts")
-parser.add_argument('-r', '--reference-genome', dest="ref_gen", help="Reference genome file path (only for Cufflinks). \n Default: /opt/genome/human/hg19/index/hg19.fa. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hg19.fa")
+parser.add_argument('-r', '--reference-genome', dest="ref_gen", help="Reference genome file path (only for Cufflinks). \n Default: human hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hg19.fa")
 parser.add_argument('-dea', '--dea-method', dest="dea_method", help="Differential Expression Analysis method. \n Default: edgeR; alternatives: DESeq2, cummeRbund. \n", action="store", required=False, default="edgeR")
+parser.add_argument('-r_path', '--r_path', dest="R_path", help="Script directory (alignment, quantification and DEA). \n Default: /opt/applications/src/arpir/ARPIR. \n", action="store", required=False, default="/opt/applications/src/arpir/ARPIR")
 parser.add_argument('-o', '--output-dir', dest="output_dir", help="Output directory. \n No default option. \n", action="store", required=True)
 parser.add_argument('-meta', '--meta-analysis', dest="meta", help="Analysis with or without final meta-analysis. \n Default: full; alternative: quant. \n", action="store", required=False, default="full")
 parser.add_argument('-cat', '--max_cat', dest="max_cat", help="Max number of category showed in R plots for meta-analysis. \n Default: 5. \n", action="store", required=False, default="5")
+parser.add_argument('-comp', '--comparisons', dest="comp", help="Comparisons (cntrl_VS_treat1,cntrl_VS_treat2). \n No default option. \n", action="store", required=True)
 
 args = parser.parse_args()
 
@@ -114,7 +120,9 @@ def checkArgs(args):
     print "Quantification method =", args.q_method, "\n"
     print "Reference genome =", args.ref_gen, "\n"
     print "DEA method =", args.dea_method, "\n"
+    print "Script path =", args.R_path, "\n"
     print "Output directory =", args.output_dir, "\n"
+    print "Comparisons =", args.comp, "\n"
     if not os.path.isfile(args.bed_file):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid path for BED file.\n\tExit\n" + '\033[0m')
         sys.exit()
@@ -130,11 +138,16 @@ def checkArgs(args):
     if not os.path.isdir(args.output_dir):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid path for output dir.\n\tExit\n" + '\033[0m')
         sys.exit()
-    b=args.ref_bowtie+".fa"
-    h=args.ref_hisat2+".fa"
-    if not os.path.isfile(b) or not os.path.isfile(h):
-        print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid paths for index genome (hisat or bowtie).\n\tExit\n" + '\033[0m')
-        sys.exit()
+    if args.a_method == "hisat":
+        h=args.ref_hisat2+".fa"
+        if not os.path.isfile(h):
+            print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid paths for index genome (hisat).\n\tExit\n" + '\033[0m')
+            sys.exit()
+    if args.a_method == "tophat":
+        b=args.ref_bowtie+".fa"
+        if not os.path.isfile(b):
+            print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid paths for index genome (bowtie).\n\tExit\n" + '\033[0m')
+            sys.exit()
     r1=args.read1.split(",")
     for i in range(0, (len(r1))):
         if not os.path.isfile(r1[i]):
@@ -154,7 +167,8 @@ def checkArgs(args):
     script_path6=os.path.abspath(os.path.dirname(sys.argv[0]))+"/runcummeRbund.R"
     script_path7=os.path.abspath(os.path.dirname(sys.argv[0]))+"/runDESeq2.R"
     script_path8=os.path.abspath(os.path.dirname(sys.argv[0]))+"/runedgeR.R"
-    if not os.path.isfile(script_path1) or not os.path.isfile(script_path5):
+    script_path9=os.path.abspath(os.path.dirname(sys.argv[0]))+"/fqreverseextract.pureheader.py"
+    if not os.path.isfile(script_path1) or not os.path.isfile(script_path5) or not os.path.isfile(script_path9):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no alignment scripts.\n\tExit\n" + '\033[0m')
         sys.exit()
     if not os.path.isfile(script_path2):
@@ -172,10 +186,10 @@ def checkOptions(a_method,q_method,dea_method):
     """
     Check quantification and DEA method options
     """
-    if a_method == 'HISAT2' and q_method == 'Cufflinks':
+    if a_method == 'hisat' and q_method == 'Cufflinks':
         print ('\033[0;31m' + "\n[AP]\tError: alignment method HISAT2 requires quantification method featureCounts\n\tExit\n" + '\033[0m')
         sys.exit()
-    if a_method == 'Tophat' and q_method == 'featureCounts':
+    if a_method == 'tophat' and q_method == 'featureCounts':
         print ('\033[0;31m' + "\n[AP]\tError: alignment method Tophat requires quantification method Cufflinks\n\tExit\n" + '\033[0m')
         sys.exit()
     if q_method == 'Cufflinks' and dea_method == 'edgeR':
@@ -207,23 +221,21 @@ def checkFile(read1,read2,stype,sample_name):
     if len(set(stype1))<2:
         print ('\033[0;31m' + "\n[AP]\tError while reading files: there must be at least one case and one control.\n\tExit\n" + '\033[0m')
         sys.exit()
-    if len(stype1)<4:
-        print ('\033[0;31m' + "\n[AP]\tError while reading files: there must be at least two replicates per group.\n\tExit\n" + '\033[0m')
-        sys.exit()
     
 
 
-def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,ref_bowtie,ref_hisat2,bed_file,phix,rib1,rib2,a_method,GTF,library_type,stype,q_method,dea_method):
+def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,ref_bowtie,ref_hisat2,bed_file,phix,rib1,rib2,a_method,GTF,library_type,R_path,stype,q_method,dea_method,comp):
     """
     Run alignment script as desired
     """
+#    print ('\033[1;33m' + "\n^^^^^^^^^Alignment script running^^^^^^^^^\n" + '\033[0m')
     cmd1="mkdir "+output_dir+"/"+project_name
     os.system(cmd1)
     cmd2="mkdir "+output_dir+"/"+project_name+"/"+pool_name
     os.system(cmd2)
     cmd3="mkdir "+output_dir+"/"+project_name+"/"+pool_name+"/reports"
     os.system(cmd3)    
-    with open(output_dir+'/'+project_name+'/'+pool_name+'/input.csv', 'wb') as csvfile:
+    with open(output_dir+'/'+project_name+'/'+pool_name+'/input_all.csv', 'wb') as csvfile:
         filewriter = csv.writer(csvfile, delimiter=',')
         filewriter.writerow(['sample_name','BAM_path','Type'])
         csvfile.close()
@@ -235,6 +247,7 @@ def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,
         filewriter.writerow(['library_type',library_type])
         filewriter.writerow(['quantification_method',q_method])
         filewriter.writerow(['dea_method',dea_method])
+        filewriter.writerow(['comparisons',comp])
         csvfile.close()
     if read2 == "":
         with open(output_dir+'/'+project_name+'/'+pool_name+'/reports/general_report.csv', 'a') as csvfile:
@@ -248,7 +261,7 @@ def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,
             csvfile.close()
     with open(output_dir+'/'+project_name+'/'+pool_name+'/reports/sample_report.csv', 'wb') as csvfile:
         filewriter = csv.writer(csvfile, delimiter='\t')
-        filewriter.writerow(['sample_name','sample_type','number_raw_reads','number_phix_reads','number_ribosomal_reads'])
+        filewriter.writerow(['sample_name','sample_type','number_raw_reads','number_phix_reads','number_ribosomal_reads','number_mapped_reads'])
         csvfile.close()
     read1a=read1.split(",")
     sample_name1=sample_name.split(",")
@@ -256,20 +269,21 @@ def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,
     if read2 != "":
         read2a=read2.split(",")
         for i in range(0, (len(read1a))):
-            cmd="bash "+os.path.abspath(os.path.dirname(sys.argv[0]))+"/alignment.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+read2a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+os.path.abspath(os.path.dirname(sys.argv[0]))
+            cmd="bash "+R_path+"/alignment.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+read2a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+R_path
             os.system(cmd)
     if read2 == "":
         for i in range(0, (len(read1a))):
-            cmd="bash "+os.path.abspath(os.path.dirname(sys.argv[0]))+"/alignment_se.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+os.path.abspath(os.path.dirname(sys.argv[0]))
+            cmd="bash "+R_path+"/alignment_se.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+R_path
             os.system(cmd)
 
 
-def quantification(output_dir,project_name,pool_name,dea_method,q_method,Threads,GTF,library_type,ref_gen):
+def quantification(output_dir,project_name,pool_name,R_path,dea_method,q_method,Threads,GTF,library_type,ref_gen,comp):
     """
     Run quantification script as desired
     """
-    res_dir=output_dir+"/"+project_name+"/"+pool_name
-    cmd="python "+os.path.abspath(os.path.dirname(sys.argv[0]))+"/quantification.py -i "+output_dir+'/'+project_name+'/'+pool_name+'/input.csv'+" -o "+res_dir+"/Quantification_and_DEA"+" -script_path "+os.path.abspath(os.path.dirname(sys.argv[0]))+" -dea "+dea_method+" -q "+q_method+" -t "+str(Threads)+" -g "+GTF+" -l "+library_type+" -r "+ref_gen
+#    print ('\033[1;33m' + "\n^^^^^^^^^Quantification script running^^^^^^^^^\n" + '\033[0m')
+    res_dir=output_dir+"/"+project_name+"/"+pool_name+"/"+comp
+    cmd="python "+R_path+"/quantification.py -i "+output_dir+'/'+project_name+'/'+pool_name+'/input.csv'+" -o "+res_dir+"/Quantification_and_DEA"+" -r_path "+R_path+" -dea "+dea_method+" -q "+q_method+" -t "+str(Threads)+" -g "+GTF+" -l "+library_type+" -r "+ref_gen+" -comp "+comp
     os.system(cmd)
     
     
@@ -280,15 +294,19 @@ def rminput(output_dir,project_name,pool_name):
     os.system("rm "+output_dir+'/'+project_name+'/'+pool_name+'/input.csv')
     
     
-def metaanalysis(output_dir,project_name,pool_name,dea_method,max_cat):
+def metaanalysis(output_dir,R_path,project_name,pool_name,dea_method,max_cat,comp):
     """
     Run meta-analysis script as desired
     """
-    os.system("mkdir "+output_dir+"/"+project_name+"/"+pool_name+"/Meta-analysis")
-    os.system("mkdir "+output_dir+"/"+project_name+"/"+pool_name+"/Meta-analysis/Gene_ontology")
-    os.system("mkdir "+output_dir+"/"+project_name+"/"+pool_name+"/Meta-analysis/Pathway_analysis")
-    os.system("mkdir "+output_dir+"/"+project_name+"/"+pool_name+"/Meta-analysis/Pathway_analysis/pathview")
-    cmd="Rscript --vanilla --verbose "+os.path.abspath(os.path.dirname(sys.argv[0]))+"/GO_pathway.R "+output_dir+'/'+project_name+'/'+pool_name+'/Quantification_and_DEA/*-results.csv '+dea_method+" "+output_dir+'/'+project_name+'/'+pool_name+"/Meta-analysis "+max_cat+" "+os.path.abspath(os.path.dirname(sys.argv[0]))
+    cmd="Rscript --vanilla --verbose "+R_path+"/GO_pathway.R "+output_dir+'/'+project_name+'/'+pool_name+'/'+comp+'/Quantification_and_DEA/*-results.csv '+dea_method+" "+output_dir+'/'+project_name+'/'+pool_name+'/'+comp+"/Meta-analysis "+max_cat+" "+R_path
+    os.system(cmd)
+
+
+def report(output_dir,project_name,pool_name):
+    """
+    Generate multiqc report
+    """
+    cmd="multiqc --exclude bowtie2 -o "+output_dir+'/'+project_name+'/'+pool_name+"/reports/ "+output_dir+'/'+project_name+'/'+pool_name+"/"
     os.system(cmd)
         
 
@@ -306,17 +324,33 @@ def main():
     checkFile(args.read1,args.read2,args.stype,args.sample_name)
 
     # alignment
-    alignment(args.project_name,args.pool_name,args.sample_name,args.output_dir,args.read1,args.read2,args.Threads,args.ref_bowtie,args.ref_hisat2,args.bed_file,args.phix,args.rib1,args.rib2,args.a_method,args.GTF,args.library_type,args.stype,args.q_method,args.dea_method)
+    alignment(args.project_name,args.pool_name,args.sample_name,args.output_dir,args.read1,args.read2,args.Threads,args.ref_bowtie,args.ref_hisat2,args.bed_file,args.phix,args.rib1,args.rib2,args.a_method,args.GTF,args.library_type,args.R_path,args.stype,args.q_method,args.dea_method,args.comp)
 
-    # quantification
-    quantification(args.output_dir,args.project_name,args.pool_name,args.dea_method,args.q_method,args.Threads,args.GTF,args.library_type,args.ref_gen)
-    
-    # remove input file
-    rminput(args.output_dir,args.project_name,args.pool_name)
-    
-    # meta-analysis (GO and pathway analysis)
-    if args.meta == 'full':
-        metaanalysis(args.output_dir,args.project_name,args.pool_name,args.dea_method,args.max_cat)
+    comp1=args.comp.split(",")
+    for i in range(0, (len(comp1))):
+        cat_type=comp1[i].split("_VS_")
+        data=pd.DataFrame.from_csv(args.output_dir+'/'+args.project_name+'/'+args.pool_name+'/input_all.csv',sep=',',index_col=None)
+        input_all=data.loc[(data['Type'] == cat_type[0]) | (data['Type'] == cat_type[1])]
+        input_all.to_csv (r''+args.output_dir+'/'+args.project_name+'/'+args.pool_name+'/input.csv', index = None, header=True)
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i])
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Quantification_and_DEA")
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Meta-analysis")
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Meta-analysis/Gene_ontology")
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Meta-analysis/Pathway_analysis")
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Meta-analysis/Pathway_analysis/pathview")
+
+        # quantification
+        quantification(args.output_dir,args.project_name,args.pool_name,args.R_path,args.dea_method,args.q_method,args.Threads,args.GTF,args.library_type,args.ref_gen,comp1[i])
+
+        # remove input file
+        rminput(args.output_dir,args.project_name,args.pool_name)
+
+        # meta-analysis (GO and pathway analysis)
+        if args.meta == 'full':
+            metaanalysis(args.output_dir,args.R_path,args.project_name,args.pool_name,args.dea_method,args.max_cat,comp1[i])
+
+        # final report
+        report(args.output_dir,args.project_name,args.pool_name)
     
 
 # sentinel

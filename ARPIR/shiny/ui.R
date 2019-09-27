@@ -4,9 +4,10 @@ library(visNetwork)
 args <- commandArgs(trailingOnly=TRUE)
 out_dir <- args[1]
 
+gen_sum=read.csv(paste0(out_dir,"/reports/general_report.csv"),sep="\t",header = F,row.names = 1)
 sam_sum=read.csv(paste0(out_dir,"/reports/sample_report.csv"),sep="\t")
 sam=as.character(sam_sum$sample_name)
-gen_sum=read.csv(paste0(out_dir,"/reports/general_report.csv"),sep="\t",header = F,row.names = 1)
+comp=strsplit(as.character(gen_sum[7,1]),",")[[1]]
 
 shinyUI(fluidPage(
   
@@ -105,9 +106,14 @@ shinyUI(fluidPage(
                ),
                tabPanel("Differential expression analysis",
                         fluidRow(
+                          column(6,offset=3,
+                                 wellPanel(
+                                   selectInput("comp", "Choose a comparison:", choices = comp)
+                                 )
+                          ),
                           br(),
                           column(12,offset=0,
-                                 DT::dataTableOutput("DEA_tab"),
+                                 uiOutput("DEA_tab"),
                                  plotOutput("pca", height = "800px"),
                                  plotOutput("volcano", height = "800px"),
                                  plotOutput("heat1", height = "800px"),
@@ -116,8 +122,15 @@ shinyUI(fluidPage(
                         )
                ),
                tabPanel("Meta-analysis",
+                        fluidRow(
+                          column(6,offset=3,
+                                 wellPanel(
+                                   selectInput("comp1", "Choose a comparison:", choices = comp)
+                                 )
+                          )
+                        ),
                         uiOutput("Meta_analysis"),
-                        if (!file.exists(paste0(out_dir,"/Meta-analysis"))){
+                        if (!file.exists(paste0(out_dir,"/",strsplit(as.character(gen_sum[7,1]),",")[[1]][1],"/Meta-analysis"))){
                           column(12,align="center",
                                  br(),
                                  tags$span(style="font-size: 34px", strong("No meta-analysis"))

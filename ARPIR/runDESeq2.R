@@ -4,6 +4,7 @@ args <- commandArgs(trailingOnly=TRUE)
 featCounts <- args[1]
 input <- args[2]
 output_dir <- args[3]
+comp <- args[4]
 
 setwd(output_dir)
 
@@ -26,7 +27,7 @@ for (k in 1:ncol(countdata)) {
   type <- c(type,as.character(input_table$Type[grep(colnames(countdata)[k],input_table$sample_name)]))
 }
 DataGroups <- factor(type)
-DataGroups <- relevel(DataGroups,ref=as.character(input_table$Type[1]))
+DataGroups <- relevel(DataGroups,ref=as.character(strsplit(comp,"_VS_")[[1]][1]))
 
 library(DESeq2)
 

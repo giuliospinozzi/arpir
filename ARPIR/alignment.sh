@@ -85,7 +85,6 @@ mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/FastQ
 mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/PhiX
 mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/RibosomalRNA
 mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/Quality
-mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/Quantification_and_DEA
 
 RUN_NAME="${PROJECT_NAME}|${POOL_NAME}|${LIBRARY_NAME}"
 
@@ -162,14 +161,20 @@ if [ ${ANALYSIS_PROTOCOL} = "tophat" ]; then
 		samtools index ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/accepted_hits.bam;
 		BAM="${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/accepted_hits.bam";
 	fi
-	READS_MAPPED=$((`samtools flagstat $BAM | grep '0 mapped ' | cut -d' ' -f1`)) ;
-	cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input.csv && echo "${LIBRARY_NAME},${BAM},${SAMPLE_TYPE}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input.csv
+	READS_MAPPED=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/align_summary.txt | grep 'Mapped' | cut -d' ' -f17`)) ;
+	printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${RED}##### READS MAPPED: ${READS_MAPPED} #####${NC}\n"
+	cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input_all.csv && echo "${LIBRARY_NAME},${BAM},${SAMPLE_TYPE}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input_all.csv
 	printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${YELLOW}####### RSeQC Report #######${NC}\n"
 	inner_distance.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
 	junction_annotation.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+#	read_duplication.py -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
 	junction_saturation.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
 	bam_stat.py -i ${BAM} > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME}.bam_stat.txt;
 	read_distribution.py -r ${BED_FILE} -i ${BAM} > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME}.read_distribution.txt;
+#	geneBody_coverage.py -r ${BED_FILE}  -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+#	read_quality.py -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+	bamCoverage -p ${MAXTHREADS} -b ${BAM} --outFileFormat bigwig -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/${LIBRARY_NAME}.bw
+	bamCoverage -p ${MAXTHREADS} -b ${BAM} --outFileFormat bedgraph -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/TopHat2/${LIBRARY_NAME}/${LIBRARY_NAME}.bedgraph
 
 elif [ ${ANALYSIS_PROTOCOL} = "hisat"  ]; then
 	mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2
@@ -178,7 +183,7 @@ elif [ ${ANALYSIS_PROTOCOL} = "hisat"  ]; then
 	if [ ${LIBRARY_TYPE} = "fr-firststrand" ]; then
 		printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${YELLOW}##### Mapping Reads to the Genome #####${NC}\n"
 		printf "${GREEN}@@@@ Splicing read mapping --> HISAT2${NC}\n"
-		hisat2 -p ${MAXTHREADS} --dta --rna-strandness RF -x ${REFERENCE_GENOME_HISAT2} -1 ${R1_FASTQ} -2 ${R2_FASTQ} -S ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sam;
+		hisat2 -p ${MAXTHREADS} --dta --new-summary --rna-strandness RF -x ${REFERENCE_GENOME_HISAT2} -1 ${R1_FASTQ} -2 ${R2_FASTQ} -S ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sam 2> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.txt;
 		samtools view -@ ${MAXTHREADS} -b -S ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sam > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.bam;
 		rm ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sam; 
 		samtools sort -@ ${MAXTHREADS} ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.bam > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam;
@@ -188,7 +193,7 @@ elif [ ${ANALYSIS_PROTOCOL} = "hisat"  ]; then
 	elif [ ${LIBRARY_TYPE} = "fr-secondstrand" ]; then
 		printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${YELLOW}##### Mapping Reads to the Genome #####${NC}\n"
 		printf "${GREEN}@@@@ Splicing read mapping --> HISAT2${NC}\n"
-		hisat2 -p ${MAXTHREADS} --dta --rna-strandness FR -x ${REFERENCE_GENOME_HISAT2} -1 ${R1_FASTQ} -2 ${R2_FASTQ} -S ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sam;
+		hisat2 -p ${MAXTHREADS} --dta --new-summary --rna-strandness FR -x ${REFERENCE_GENOME_HISAT2} -1 ${R1_FASTQ} -2 ${R2_FASTQ} -S ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sam 2> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.txt;
 		samtools view -@ ${MAXTHREADS} -b -S ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sam > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.bam;
 		rm ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sam; 
 		samtools sort -@ ${MAXTHREADS} ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.bam > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam;
@@ -196,15 +201,23 @@ elif [ ${ANALYSIS_PROTOCOL} = "hisat"  ]; then
 		samtools index ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam;
 		BAM="${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam";
 	fi
-	READS_MAPPED=$((`samtools flagstat $BAM | grep '0 mapped ' | cut -d' ' -f1`)) ;
-	cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input.csv && echo "${LIBRARY_NAME},${BAM},${SAMPLE_TYPE}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input.csv
+	READS_MAPPED_1=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.txt | grep 'Aligned 1 time' | cut -d' ' -f4`)) ;
+	READS_MAPPED_2=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.txt | grep 'Aligned >1 times' | cut -d' ' -f4`)) ;
+	READS_MAPPED=$(($READS_MAPPED_1 + $READS_MAPPED_2));
+	printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${RED}##### READS MAPPED: ${READS_MAPPED} #####${NC}\n"
+	cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input_all.csv && echo "${LIBRARY_NAME},${BAM},${SAMPLE_TYPE}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input_all.csv
 	printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${YELLOW}####### RSeQC Report #######${NC}\n"
 	inner_distance.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
 	junction_annotation.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+#	read_duplication.py -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
 	junction_saturation.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
 	bam_stat.py -i ${BAM} > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME}.bam_stat.txt;
 	read_distribution.py -r ${BED_FILE} -i ${BAM} > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME}.read_distribution.txt;
+#	geneBody_coverage.py -r ${BED_FILE}  -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+#	read_quality.py -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+	bamCoverage -p ${MAXTHREADS} -b ${BAM} --outFileFormat bigwig -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.bw
+	bamCoverage -p ${MAXTHREADS} -b ${BAM} --outFileFormat bedgraph -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.bedgraph
 fi
 
-cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/reports/sample_report.csv && echo -e "${LIBRARY_NAME}\t${SAMPLE_TYPE}\t${NUMBER_RAW_READS}\t${NUMBER_PHIX_READS}\t${NUMBER_RIBOSOMAL_READS}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/reports/sample_report.csv
+cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/reports/sample_report.csv && echo -e "${LIBRARY_NAME}\t${SAMPLE_TYPE}\t${NUMBER_RAW_READS}\t${NUMBER_PHIX_READS}\t${NUMBER_RIBOSOMAL_READS}\t${READS_MAPPED}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/reports/sample_report.csv
 

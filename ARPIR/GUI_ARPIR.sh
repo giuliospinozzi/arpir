@@ -1,13 +1,16 @@
 
 description=$(zenity --forms --title="RNA-Seq project" --text="Assign experiment code (no spaces!)" --add-entry="PROJECT NAME" --add-entry="POOL NAME" --add-entry="SAMPLE NAMES 
-(first the controls,sep by ',')
-[cntrl7,cntrl8,treat10,treat11]" --add-entry="SAMPLE TYPES (sep by ',')
-[cntrl,cntrl,treat,treat]" --add-entry="LOG NAME")
+(sep by ',')
+[cntrl7,cntrl8,treat0,treat11]" --add-entry="SAMPLE TYPES (sep by ',')
+[cntrl,cntrl,treat,treat]" --add-entry="LOG NAME" --add-entry="COMPARISONS 
+(sep by '_VS_' and ',' for multiple comparisons)
+[cntrl_VS_treat1,cntrl_VS_treat2]")
 pname=$(echo $description | cut -d'|' -f1)
 poolname=$(echo $description | cut -d'|' -f2)
 snames=$(echo $description | cut -d'|' -f3)
 stype=$(echo $description | cut -d'|' -f4)
 LOG=$(echo $description | cut -d'|' -f5)
+comp=$(echo $description | cut -d'|' -f6)
 
 array=$(echo $snames | tr "," "\n")
 arr=($array)
@@ -18,14 +21,14 @@ se_pe=$(zenity --list --text="" --radiolist --column "" --column "" --hide-heade
 
 for sample in `seq 1 "${#arr[@]}"`; do
 	zenity --info --title="READ-1" --text="Select read-1 file for "${arr[$(($sample-1))]} --ok-label="OK";
-	READ1a=$(zenity --file-selection --title="***READ-1***"  --text="Select read-1 file");
+	READ1a=$(zenity --file-selection --filename /opt/ngs/raw_data/ --title="***READ-1***"  --text="Select read-1 file");
 	READ1b+=( ${READ1a} )
 done
 
 if [ ${se_pe} = "Paired_end" ]; then
 	for sample in `seq 1 "${#arr[@]}"`; do
 		zenity --info --title="READ-2" --text="Select read-2 file for "${arr[$(($sample-1))]} --ok-label="OK";
-		READ2a=$(zenity --file-selection --title="***READ-2***"  --text="Select read-2 file");
+		READ2a=$(zenity --file-selection --filename /opt/ngs/raw_data/ --title="***READ-2***"  --text="Select read-2 file");
 		READ2b+=( ${READ2a} )
 	done
 fi
@@ -33,6 +36,14 @@ fi
 function join { local IFS="$1"; shift; echo "$*"; }
 READ1=$(join , ${READ1b[@]})
 READ2=$(join , ${READ2b[@]})
+
+zenity --info --title="Reference genome Bowtie" --text="Select reference genome for Bowtie" --ok-label="OK" 
+REF_BOWTIE=$(zenity --file-selection --filename /opt/genome/human/hg19/index/bowtie2/hg19.fa --title="***Reference genome Bowtie***"  --text="Select reference genome for Bowtie")
+REF_BOWTIE=$(echo $REF_BOWTIE | sed s/.fa//g)
+
+zenity --info --title="Reference genome Hisat2" --text="Select reference genome for Hisat2" --ok-label="OK" 
+REF_HISAT=$(zenity --file-selection --filename /opt/genome/human/hg19/index/hisat2/hg19.fa --title="***Reference genome Hisat2***"  --text="Select reference genome for Hisat2")
+REF_HISAT=$(echo $REF_HISAT | sed s/.fa//g)
 
 zenity --info --title="BED file" --text="Select BED file" --ok-label="OK" 
 BED=$(zenity --file-selection --filename /opt/genome/human/hg19/annotation/hg19.refseq.bed12 --title="***BED file***"  --text="Select BED file")
@@ -65,14 +76,6 @@ library=$(zenity --list --text="Choose library type" --radiolist --column "" --c
 
 alignment=$(zenity --list --text="Choose alignment method" --radiolist --column "" --column "Alignment method" --hide-header --title="Alignment method" TRUE "hisat" FALSE "tophat")
 
-zenity --info --title="Reference genome Bowtie" --text="Select reference genome (with indexes) for Bowtie" --ok-label="OK" 
-REF_BOWTIE=$(zenity --file-selection --filename /opt/genome/human/hg19/index/bowtie2/hg19.fa --title="***Reference genome Bowtie***"  --text="Select reference genome for Bowtie")
-REF_BOWTIE=$(echo $REF_BOWTIE | sed s/.fa//g)
-
-zenity --info --title="Reference genome Hisat2" --text="Select reference genome (with indexes) for Hisat2" --ok-label="OK" 
-REF_HISAT=$(zenity --file-selection --filename /opt/genome/human/hg19/index/hisat2/hg19.fa --title="***Reference genome Hisat2***"  --text="Select reference genome for Hisat2")
-REF_HISAT=$(echo $REF_HISAT | sed s/.fa//g)
-
 if [ ${alignment} = "hisat" ]; then
 	quant="featureCounts";
 	dea=$(zenity --list --text="Choose differential expression analysis method" --radiolist --column "" --column "DEA method" --hide-header --title="DEA method" TRUE "edgeR" FALSE "DESeq2");
@@ -100,6 +103,8 @@ pool_name = "$poolname"
 sample_names = "$snames"
 
 sample_types = "$stype"
+
+comparisons = "$comp"
 
 log = "$LOG"
 
@@ -136,14 +141,14 @@ threads = "$threads | zenity --text-info --title="Summary" --width=700 --height=
 if [ ${se_pe} = "Paired_end" ]; then
 	if [ "$?" -eq "0" ]; then
 		cd ${OUT}
-		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -r2 $READ2 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -script_path $R -o $OUT -meta $meta -cat $max_cat 2>&1 >> ${LOGF}/${LOG}.log
+		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -r2 $READ2 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -meta $meta -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
 	fi
 fi
 
 if [ ${se_pe} = "Single_end" ]; then
 	if [ "$?" -eq "0" ]; then
 		cd ${OUT}
-		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -script_path $R -o $OUT -meta $meta -cat $max_cat 2>&1 >> ${LOGF}/${LOG}.log
+		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -meta $meta -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
 	fi
 fi
 
