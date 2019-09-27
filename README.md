@@ -1,7 +1,7 @@
 # ARPIR (Automatic RNA-Seq Pipelines with Interactive Report)
 
 ## Introduction
-<p align="justify"> ARPIR makes RNA-Seq analysis: quality control, pre-processing, alignment, transcript quantification and differential expression analysis on BAM files. Given the input files and the working directory, the pipeline is completely automated. First, quality control on FastQ files is performed with FastQC e FastQ Screen. FastQC makes quality control and creates one report for sample. FastQ Screen estimates approximately the percentage of reads that can be mapped on genomes other than human, like ribosomal genomes, PhiX genome and mouse genome. This allows to evaluate the presence of contaminating genomes. Pre-processing follows quality control: the reads are aligned on PhiX genome and ribosomal genome to eliminate contaminations. Alignment can be performed with TopHat2 or HISAT2; in the first case quantification is performed with Cufflinks and DEA with cummeRbund, in the second case quantification is performed with featureCounts and DEA with DESeq2 or edgeR. A second intermediate quality control analysis is also performed on the aligned BAM files with some of the RSeQC scripts and in particular: inner_distance, junction_annotation, junction_saturation, bam_stat, read_distribution, geneBody_coverage. It is possible to perform an optional meta-analysis on the results. It consists in Gene Ontology enrichment analysis and KEGG Pathway enrichment analysis on the differentially expressed genes (with absolute Fold Change value higher than 1.5 and adjusted p-value lower than 0.05). </p>
+<p align="justify"> ARPIR makes RNA-Seq analysis: quality control, pre-processing, alignment, transcript quantification and differential expression analysis on BAM files. Given the input files and the working directory, the pipeline is completely automated. First, quality control on FastQ files is performed with FastQC and FastQ Screen. FastQC makes quality control and creates one report for sample. FastQ Screen estimates approximately the percentage of reads that can be mapped on genomes other than human, like ribosomal genomes, PhiX genome and mouse genome. This allows to evaluate the presence of contaminating genomes. Pre-processing follows quality control: the reads are aligned on PhiX genome and ribosomal genome to eliminate contaminations. Alignment can be performed with TopHat2 or HISAT2; in the first case quantification is performed with Cufflinks and DEA with cummeRbund, in the second case quantification is performed with featureCounts and DEA with DESeq2 or edgeR. A second intermediate quality control analysis is also performed on the aligned BAM files with some of the RSeQC scripts and in particular: inner_distance, junction_annotation, junction_saturation, bam_stat, read_distribution, geneBody_coverage. A final report is generated from the results using multiqc. It is possible to perform an optional meta-analysis on the results. It consists in Gene Ontology enrichment analysis and KEGG Pathway enrichment analysis on the differentially expressed genes (with absolute Fold Change value higher than 1.5 and adjusted p-value lower than 0.05). </p>
 
 ## Prerequisites
 <p align="justify"> For ARPIR to work properly, you must first make sure that you have installed the necessary applications for the pipeline. </p>
@@ -12,6 +12,7 @@
 *	Python 2.7.12 (modules: os, argparse, sys, csv, pandas) (https://www.python.org/downloads/)
 *	R 3.4.3 (packages: cummeRbund, edgeR, DESeq2, ggfortify, ggrepel, genefilter, RColorBrewer, gplots, clusterProfiler, dplyr, org.Hs.eg.db, igraph, scales, treemap, pathview, shiny, DT, magick, rlist, visNetwork, shinyjs, knitr) (https://www.r-project.org/)
 * pandoc (https://pandoc.org/)
+* multiqc 1.7 (https://multiqc.info/)
 #### For quality control on fastq files and pre-processing:
 *	FastQC 0.11.5 (https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 *	FastQ Screen 0.11.3 (https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/)
@@ -55,11 +56,11 @@ In the case of HISAT, instead, the necessary command is:<br>
 
 #### Paired-end
 
-```python ARPIR.py -n <project_name> -pn <pool_name> -sn <sample_A,sample_B,sample_C,sample_D> -r1 <sample_A_read1,sample_B_read1,sample_C_read1,sample_D_read1> -r2 <sample_A_read2,sample_B_read2,sample_C_read2,sample_D_read2> -type <cntrl,cntrl,treat,treat> -o <output_directory> [options]*```
+```python ARPIR.py -n <project_name> -pn <pool_name> -sn <sample_A,sample_B,sample_C,sample_D> -r1 <sample_A_read1,sample_B_read1,sample_C_read1,sample_D_read1> -r2 <sample_A_read2,sample_B_read2,sample_C_read2,sample_D_read2> -type <cntrl,cntrl,treat,treat> -comp <cntrl_VS_treat> -o <output_directory> [options]*```
 
 #### Single-end
 
-```python ARPIR.py -n <project_name> -pn <pool_name> -sn <sample_A,sample_B,sample_C,sample_D> -r1 <sample_A_read1,sample_B_read1,sample_C_read1,sample_D_read1> -type <cntrl,cntrl,treat,treat> -o <output_directory> [options]*```
+```python ARPIR.py -n <project_name> -pn <pool_name> -sn <sample_A,sample_B,sample_C,sample_D> -r1 <sample_A_read1,sample_B_read1,sample_C_read1,sample_D_read1> -type <cntrl,cntrl,treat,treat> -comp <cntrl_VS_treat> -o <output_directory> [options]*```
 
 #### Arguments
 | | |
@@ -70,6 +71,7 @@ In the case of HISAT, instead, the necessary command is:<br>
 ```-r1```	| Read 1 fastq path (',' sep). No default options. Files must appear in the same order as sample names. <br>
 ```-r2```	| Read 2 fastq path (',' sep). Required only for paired-end analysis. Files must appear in the same order as sample names. <br>
 ```-type```	| Sample types (',' sep). No default options. Types must appear in the same order as sample names. <br>
+```-comp```	| Comparisons between samples (allows multiple comparisons comma separated). No default option. <br>
 ```-o``` | Output directory. No default options. <br>
 
 #### Options
@@ -88,13 +90,14 @@ In the case of HISAT, instead, the necessary command is:<br>
 ```-q```	| Quantification method. Default: featureCounts; alternative: Cufflinks. <br>
 ```-r```	| Reference genome file path. Default: `/opt/genome/human/hg19/index/hg19.fa` <br>
 ```-dea```	| Differential Expression Analysis method. Default: edgeR; alternatives: DESeq2, cummeRbund. <br>
+```-r_path```	| Script directory (alignment, quantification and DEA). Default: `/opt/applications/src/arpir/ARPIR`. <br>
 ```-meta``` | Analysis with or without final meta-analysis. Default: full; alternative: quant. <br>
 ```-cat``` | Max number of categories showed in R plots for meta-analysis. Default: 5. <br>
 
 #### Example
-<p align="justify"> Below is an example of use for a paired end analysis with the edgeR pipeline.</p>
+<p align="justify"> To make the launch of the command easier, we have created a script run.sh where you can enter all the desired variables. Once done, you can launch the pipeline with the following command:</p>
 
-```python ARPIR/ARPIR.py -n Project_01 -pn Simulation -sn sample_01,sample_02,sample_03,sample_04,sample_05,sample_06 -r1 /opt/ngs/Simulation/sample_01_1.fastq.gz,/opt/ngs/Simulation/sample_02_1.fastq.gz,/opt/ngs/Simulation/sample_03_1.fastq.gz,/opt/ngs/Simulation/sample_04_1.fastq.gz,/opt/ngs/Simulation/sample_05_1.fastq.gz,/opt/ngs/Simulation/sample_06_1.fastq.gz -r2 /opt/ngs/Simulation/sample_01_2.fastq.gz,/opt/ngs/Simulation/sample_02_2.fastq.gz,/opt/ngs/Simulation/sample_03_2.fastq.gz,/opt/ngs/Simulation/sample_04_2.fastq.gz,/opt/ngs/Simulation/sample_05_2.fastq.gz,/opt/ngs/Simulation/sample_06_2.fastq.gz -type cntrl,cntrl,cntrl,treat,treat,treat -o /opt/ngs -rb /opt/genome/human/hg19/index/bowtie2/hg19 -rh /opt/genome/human/hg19/index/hisat2/hg19 -bed /opt/genome/human/hg19/annotation/hg19.refseq.bed12 -ph /opt/genome/control/phix174/bwa/phiX174.fa -rib1 /opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa -rib2 /opt/genome/human/hg19/contam/bwa/humRibosomal.fa -t 12 -g /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf -a hisat -l fr-firststrand -q featureCounts -r /opt/genome/human/hg19/index/hg19.fa -dea edgeR -meta full -cat 5```
+```bash run.sh```
 
 ### Graphical User Interface
 #### Usage
