@@ -36,7 +36,6 @@ The necessary input files are as follows:
 *	<p align="justify">Ribosomal genome with relative indexes, necessary for pre-processing. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/contam/bwa/humRibosomal.fa.</p>
 *	<p align="justify">GTF file, necessary for alignment with TopHat2 and quantification with featureCounts and Cufflinks. The path in which the file is searched by default is as follows: /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf.</p>
 *	<p align="justify">Reference genome with relative indexes, necessary for quantification with Cufflinks. The path in which the file with its indexes is searched by default is as follows: /opt/genome/human/hg19/index/hg19.fa. The reference genome file is the same, but the indexes change. </p>
-<p align="justify"> Illumina makes genome and annotation files available for various organisms, which can be downloaded at the following link: ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/. In addition to the Fasta file of the genome, the folder also contains indexes for different aligners and annotation files. </p>
 
 #### Creating indexes:
 <p align="justify"> The indexes can be created starting from the Fasta file and require different commands based on the alignment software for which they will be used.</p>
