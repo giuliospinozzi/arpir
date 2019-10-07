@@ -18,6 +18,8 @@
 *	FastQ Screen 0.11.3 (https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/)
 *	bwa 0.7.12-r1039 (http://bio-bwa.sourceforge.net/)
 *	samtools 1.9 (http://samtools.sourceforge.net/)
+* pigz
+* GD::Graph Perl module
 #### For alignment and quality control on BAM files:
 *	TopHat 2.1.1 (https://ccb.jhu.edu/software/tophat/index.shtml)
 *	RSeQC 2.6.4 (http://rseqc.sourceforge.net/)
