@@ -12,7 +12,7 @@ SAMPLE_NAMES="sample_01,sample_02,sample_03,sample_04,sample_05,sample_06";
 # Read 1 fastq path (',' sep). Files must appear in the same order as sample names.
 READ_1="/opt/ngs/Simulation/sample_01_1.fastq.gz,/opt/ngs/Simulation/sample_02_1.fastq.gz,/opt/ngs/Simulation/sample_03_1.fastq.gz,/opt/ngs/Simulation/sample_04_1.fastq.gz,/opt/ngs/Simulation/sample_05_1.fastq.gz,/opt/ngs/Simulation/sample_06_1.fastq.gz";
 
-# Read 2 fastq path (',' sep). Required only for paired-end analysis. Files must appear in the same order as sample names.
+# Read 2 fastq path (',' sep). Files must appear in the same order as sample names. Required only for paired-end analysis.
 READ_2="/opt/ngs/Simulation/sample_01_2.fastq.gz,/opt/ngs/Simulation/sample_02_2.fastq.gz,/opt/ngs/Simulation/sample_03_2.fastq.gz,/opt/ngs/Simulation/sample_04_2.fastq.gz,/opt/ngs/Simulation/sample_05_2.fastq.gz,/opt/ngs/Simulation/sample_06_2.fastq.gz";
 
 # Sample types (',' sep). Types must appear in the same order as sample names.
@@ -70,11 +70,15 @@ META_ANALYSIS="full";
 CATEGORY_NUMBER="5";
 
 # LOG file.
-#LOG="/opt/ngs/logs/simulation.log";
-LOG="/opt/ngs/logs/190926_simulation.log";
+LOG="/opt/ngs/logs/simulation.log";
 
 #Comparisons (cntrl_VS_treat1,cntrl_VS_treat2).
 COMPARISONS="cntrl_VS_treat";
 
 
-nohup python ${SCRIPT_DIR}/ARPIR.py -n ${PROJECT_NAME} -pn ${POOL_NAME} -sn ${SAMPLE_NAMES} -r1 ${READ_1} -r2 ${READ_2} -type ${TYPE} -o ${OUTPUT_DIR} -rb ${BOWTIE_DNA} -rh ${HISAT_DNA} -bed ${BED_FILE} -ph ${PHIX_DNA} -rib1 ${RIBOSOMAL_DNA_1} -rib2 ${RIBOSOMAL_DNA_2} -t ${THREADS} -g ${GFT_FILE} -a ${ALIGNMENT} -l ${LIBRARY} -q ${QUANTIFICATION} -r_path ${SCRIPT_DIR} -r ${REFERENCE_DNA} -dea ${DEA} -comp ${COMPARISONS} -meta ${META_ANALYSIS} -cat ${CATEGORY_NUMBER} 2>&1 > ${LOG} &
+## uncomment the analysis type of interest
+# paired-end analysis
+#nohup python ${SCRIPT_DIR}/ARPIR.py -n ${PROJECT_NAME} -pn ${POOL_NAME} -sn ${SAMPLE_NAMES} -r1 ${READ_1} -r2 ${READ_2} -type ${TYPE} -o ${OUTPUT_DIR} -rb ${BOWTIE_DNA} -rh ${HISAT_DNA} -bed ${BED_FILE} -ph ${PHIX_DNA} -rib1 ${RIBOSOMAL_DNA_1} -rib2 ${RIBOSOMAL_DNA_2} -t ${THREADS} -g ${GFT_FILE} -a ${ALIGNMENT} -l ${LIBRARY} -q ${QUANTIFICATION} -r_path ${SCRIPT_DIR} -r ${REFERENCE_DNA} -dea ${DEA} -comp ${COMPARISONS} -meta ${META_ANALYSIS} -cat ${CATEGORY_NUMBER} 2>&1 > ${LOG} &
+
+# single-end analysis
+#nohup python ${SCRIPT_DIR}/ARPIR.py -n ${PROJECT_NAME} -pn ${POOL_NAME} -sn ${SAMPLE_NAMES} -r1 ${READ_1} -type ${TYPE} -o ${OUTPUT_DIR} -rb ${BOWTIE_DNA} -rh ${HISAT_DNA} -bed ${BED_FILE} -ph ${PHIX_DNA} -rib1 ${RIBOSOMAL_DNA_1} -rib2 ${RIBOSOMAL_DNA_2} -t ${THREADS} -g ${GFT_FILE} -a ${ALIGNMENT} -l ${LIBRARY} -q ${QUANTIFICATION} -r_path ${SCRIPT_DIR} -r ${REFERENCE_DNA} -dea ${DEA} -comp ${COMPARISONS} -meta ${META_ANALYSIS} -cat ${CATEGORY_NUMBER} 2>&1 > ${LOG} &
