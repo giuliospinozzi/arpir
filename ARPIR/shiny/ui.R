@@ -74,11 +74,11 @@ shinyUI(fluidPage(
                           ),
                           column(8,align="center",
                                  plotOutput("quality1",height = "600px"),
-                                 if (gen_sum[7,1]=="Paired_end") {
+                                 if (gen_sum[8,1]=="Paired_end") {
                                    plotOutput("quality2",height = "600px")
                                  },
                                  plotOutput("quality3",height = "600px"),
-                                 if (gen_sum[7,1]=="Paired_end") {
+                                 if (gen_sum[8,1]=="Paired_end") {
                                    plotOutput("quality4",height = "600px")
                                  }
                           )
@@ -95,7 +95,7 @@ shinyUI(fluidPage(
                           column(8,
                                  verbatimTextOutput("stat"),
                                  verbatimTextOutput("read"),
-                                 if (gen_sum[7,1]=="Paired_end") {
+                                 if (gen_sum[8,1]=="Paired_end") {
                                    plotOutput("inn",height = "800px")
                                  },
                                  plotOutput("jun_out",height = "800px"),
