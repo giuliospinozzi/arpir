@@ -121,7 +121,6 @@ shinyServer(function(input, output, session) {
     path1=list()
     dot=list()
     dotp=list()
-    hist_go=list()
     hist_go_a=list()
     hist_path=list()
     for (j in 1:length(comp)) {
@@ -136,22 +135,52 @@ shinyServer(function(input, output, session) {
         GO_gene$logFC=signif(GO_gene$logFC,digits = 3)
         GO_gene1=list.append(GO_gene1,GO_gene)
         tree=list.append(tree,image_read_pdf(paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.pdf")))
-        dotp=list.append(dotp,list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
-                                         pattern = "dotplot_GO_.*\\.pdf",
-                                         full.names = T))
         dot_go=list()
-        for (i in 1:length(dotp[[j]])) {
-          dot_go=list.append(dot_go,image_read_pdf(dotp[[j]][i]))
+        dotp_bp=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+                           pattern = "dotplot_GO_BP.pdf",
+                           full.names = T)
+        if(length(dotp_bp)>0) {
+          dot_go=list.append(dot_go,image_read_pdf(dotp_bp))
+          names(dot_go)[[length(dot_go)]]="Biological Process"
+        }
+        dotp_cc=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+                           pattern = "dotplot_GO_CC.pdf",
+                           full.names = T)
+        if(length(dotp_cc)>0) {
+          dot_go=list.append(dot_go,image_read_pdf(dotp_cc))
+          names(dot_go)[[length(dot_go)]]="Cellular Component"
+        }
+        dotp_mf=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+                           pattern = "dotplot_GO_MF.pdf",
+                           full.names = T)
+        if(length(dotp_mf)>0) {
+          dot_go=list.append(dot_go,image_read_pdf(dotp_mf))
+          names(dot_go)[[length(dot_go)]]="Molecular Function"
         }
         dot_go1=list.append(dot_go1,dot_go)
-        hist_go=list.append(hist_go,list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
-                                               pattern = "hist_.*\\.png",
-                                               full.names = T))
-        hist_go1=list()
-        for (i in 1:length(hist_go[[j]])) {
-          hist_go1=list.append(hist_go1,image_read(hist_go[[j]][i]))
+        hist_go=list()
+        hist_bp=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+                           pattern = "hist_biological_process.png",
+                           full.names = T)
+        if(length(hist_bp)>0) {
+          hist_go=list.append(hist_go,image_read(hist_bp))
+          names(hist_go)[[length(hist_go)]]="Biological Process"
         }
-        hist_go_a=list.append(hist_go_a,hist_go1)
+        hist_cc=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+                           pattern = "hist_cellular_component.png",
+                           full.names = T)
+        if(length(hist_cc)>0) {
+          hist_go=list.append(hist_go,image_read(hist_cc))
+          names(hist_go)[[length(hist_go)]]="Cellular Component"
+        }
+        hist_mf=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+                           pattern = "hist_molecular_function.png",
+                           full.names = T)
+        if(length(hist_mf)>0) {
+          hist_go=list.append(hist_go,image_read(hist_mf))
+          names(hist_go)[[length(hist_go)]]="Molecular Function"
+        }
+        hist_go_a=list.append(hist_go_a,hist_go)
       }
       if (file.exists(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))){
         path=read.csv(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/pathway_FC1.5_pv0.05.csv"))
@@ -320,78 +349,68 @@ shinyServer(function(input, output, session) {
     
     output$network <- renderVisNetwork ({
       j=grep(input$comp1,comp)
-      if (length(grep("BP",dotp[[j]]))>0) {
-        n_cat=input$n_cat
-        GO=GO1[[j]]
-        GOb=GO[GO$GO_domain=="biological_process",]
-        GOa=as.character(GOb$Description[1:n_cat])
-        GOa=GOa[!is.na(GOa)]
-        gg=GO_gene1[[j]][GO_gene1[[j]]$GO %in% GOa,c("GO","Gene","logFC")]
-        gg=gg[!is.na(gg$Gene),]
-        gg$fc=ifelse(gg$logFC>=0,"up","down")
-        gg1=gg[!duplicated(gg$Gene),2:ncol(gg)]
-        gg1$color=ifelse(gg1$fc=="up","red","dodgerblue")
-        gg1$value=(abs(gg1$logFC)*10)
-        gg1=gg1[,-2]
-        new=data.frame(Gene=GOa,fc=rep("GO",length(GOa)),color=rep("bisque",length(GOa)),value=rep(85,length(GOa)))
-        gg_new=rbind(new,gg1)
-        nodes=data.frame(id=gg_new$Gene,group=gg_new$fc,label=gg_new$Gene,title=gg_new$Gene,value=gg_new$value,color=gg_new$color,font.size=25)
-        edges=data.frame(from=gg$GO,to=gg$Gene,color="#8DA0CB")
-        
-        visNetwork(nodes,edges,main="GO Biological Process") %>%
-          visIgraphLayout(physics = F,smooth = F,type = "full") %>%
-          visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
-      }
-    })
-    
-    output$network1 <- renderVisNetwork ({
-      j=grep(input$comp1,comp)
-      if (length(grep("CC",dotp[[j]]))>0) {
-        n_cat=input$n_cat
-        GO=GO1[[j]]
-        GOb=GO[GO$GO_domain=="cellular_component",]
-        GOa=as.character(GOb$Description[1:n_cat])
-        GOa=GOa[!is.na(GOa)]
-        gg=GO_gene1[[j]][GO_gene1[[j]]$GO %in% GOa,c("GO","Gene","logFC")]
-        gg=gg[!is.na(gg$Gene),]
-        gg$fc=ifelse(gg$logFC>=0,"up","down")
-        gg1=gg[!duplicated(gg$Gene),2:ncol(gg)]
-        gg1$color=ifelse(gg1$fc=="up","red","dodgerblue")
-        gg1$value=(abs(gg1$logFC)*10)
-        gg1=gg1[,-2]
-        new=data.frame(Gene=GOa,fc=rep("GO",length(GOa)),color=rep("bisque",length(GOa)),value=rep(85,length(GOa)))
-        gg_new=rbind(new,gg1)
-        nodes=data.frame(id=gg_new$Gene,group=gg_new$fc,label=gg_new$Gene,title=gg_new$Gene,value=gg_new$value,color=gg_new$color,font.size=25)
-        edges=data.frame(from=gg$GO,to=gg$Gene,color="#8DA0CB")
-        
-        visNetwork(nodes,edges,main="GO Cellular Component") %>%
-          visIgraphLayout(physics = F,smooth = F,type = "full") %>%
-          visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
-      }
-    })
-    
-    output$network2 <- renderVisNetwork ({
-      j=grep(input$comp1,comp)
-      if (length(grep("MF",dotp))>0) {
-        n_cat=input$n_cat
-        GOb=GO[GO$GO_domain=="molecular_function",]
-        GOa=as.character(GOb$Description[1:n_cat])
-        GOa=GOa[!is.na(GOa)]
-        gg=GO_gene1[[j]][GO_gene1[[j]]$GO %in% GOa,c("GO","Gene","logFC")]
-        gg=gg[!is.na(gg$Gene),]
-        gg$fc=ifelse(gg$logFC>=0,"up","down")
-        gg1=gg[!duplicated(gg$Gene),2:ncol(gg)]
-        gg1$color=ifelse(gg1$fc=="up","red","dodgerblue")
-        gg1$value=(abs(gg1$logFC)*10)
-        gg1=gg1[,-2]
-        new=data.frame(Gene=GOa,fc=rep("GO",length(GOa)),color=rep("bisque",length(GOa)),value=rep(85,length(GOa)))
-        gg_new=rbind(new,gg1)
-        nodes=data.frame(id=gg_new$Gene,group=gg_new$fc,label=gg_new$Gene,title=gg_new$Gene,value=gg_new$value,color=gg_new$color,font.size=25)
-        edges=data.frame(from=gg$GO,to=gg$Gene,color="#8DA0CB")
-        
-        visNetwork(nodes,edges,main="GO Molecular Function") %>%
-          visIgraphLayout(physics = F,smooth = F,type = "full") %>%
-          visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+      n_cat=input$n_cat
+      GO=GO1[[j]]
+      if (input$go_dom=="Biological Process") {
+        if (nrow(GO[GO$GO_domain=="biological_process",])>0) {
+          GOb=GO[GO$GO_domain=="biological_process",]
+          GOa=as.character(GOb$Description[1:n_cat])
+          GOa=GOa[!is.na(GOa)]
+          gg=GO_gene1[[j]][GO_gene1[[j]]$GO %in% GOa,c("GO","Gene","logFC")]
+          gg=gg[!is.na(gg$Gene),]
+          gg$fc=ifelse(gg$logFC>=0,"up","down")
+          gg1=gg[!duplicated(gg$Gene),2:ncol(gg)]
+          gg1$color=ifelse(gg1$fc=="up","red","dodgerblue")
+          gg1$value=(abs(gg1$logFC)*10)
+          gg1=gg1[,-2]
+          new=data.frame(Gene=GOa,fc=rep("GO",length(GOa)),color=rep("bisque",length(GOa)),value=rep(85,length(GOa)))
+          gg_new=rbind(new,gg1)
+          nodes=data.frame(id=gg_new$Gene,group=gg_new$fc,label=gg_new$Gene,title=gg_new$Gene,value=gg_new$value,color=gg_new$color,font.size=25)
+          edges=data.frame(from=gg$GO,to=gg$Gene,color="#8DA0CB")
+          visNetwork(nodes,edges,main="GO Biological Process") %>%
+            visIgraphLayout(physics = F,smooth = F,type = "full") %>%
+            visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+        }
+      } else if (input$go_dom=="Cellular Component") {
+        if (nrow(GO[GO$GO_domain=="cellular_component",])>0) {
+          GOb=GO[GO$GO_domain=="cellular_component",]
+          GOa=as.character(GOb$Description[1:n_cat])
+          GOa=GOa[!is.na(GOa)]
+          gg=GO_gene1[[j]][GO_gene1[[j]]$GO %in% GOa,c("GO","Gene","logFC")]
+          gg=gg[!is.na(gg$Gene),]
+          gg$fc=ifelse(gg$logFC>=0,"up","down")
+          gg1=gg[!duplicated(gg$Gene),2:ncol(gg)]
+          gg1$color=ifelse(gg1$fc=="up","red","dodgerblue")
+          gg1$value=(abs(gg1$logFC)*10)
+          gg1=gg1[,-2]
+          new=data.frame(Gene=GOa,fc=rep("GO",length(GOa)),color=rep("bisque",length(GOa)),value=rep(85,length(GOa)))
+          gg_new=rbind(new,gg1)
+          nodes=data.frame(id=gg_new$Gene,group=gg_new$fc,label=gg_new$Gene,title=gg_new$Gene,value=gg_new$value,color=gg_new$color,font.size=25)
+          edges=data.frame(from=gg$GO,to=gg$Gene,color="#8DA0CB")
+          visNetwork(nodes,edges,main="GO Cellular Component") %>%
+            visIgraphLayout(physics = F,smooth = F,type = "full") %>%
+            visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+        }
+      } else if (input$go_dom=="Molecular Function") {
+        if (nrow(GO[GO$GO_domain=="molecular_function",])>0) {
+          GOb=GO[GO$GO_domain=="molecular_function",]
+          GOa=as.character(GOb$Description[1:n_cat])
+          GOa=GOa[!is.na(GOa)]
+          gg=GO_gene1[[j]][GO_gene1[[j]]$GO %in% GOa,c("GO","Gene","logFC")]
+          gg=gg[!is.na(gg$Gene),]
+          gg$fc=ifelse(gg$logFC>=0,"up","down")
+          gg1=gg[!duplicated(gg$Gene),2:ncol(gg)]
+          gg1$color=ifelse(gg1$fc=="up","red","dodgerblue")
+          gg1$value=(abs(gg1$logFC)*10)
+          gg1=gg1[,-2]
+          new=data.frame(Gene=GOa,fc=rep("GO",length(GOa)),color=rep("bisque",length(GOa)),value=rep(85,length(GOa)))
+          gg_new=rbind(new,gg1)
+          nodes=data.frame(id=gg_new$Gene,group=gg_new$fc,label=gg_new$Gene,title=gg_new$Gene,value=gg_new$value,color=gg_new$color,font.size=25)
+          edges=data.frame(from=gg$GO,to=gg$Gene,color="#8DA0CB")
+          visNetwork(nodes,edges,main="GO Molecular Function") %>%
+            visIgraphLayout(physics = F,smooth = F,type = "full") %>%
+            visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE)
+        }
       }
     })
     
@@ -403,47 +422,36 @@ shinyServer(function(input, output, session) {
     
     output$dot1 <- renderPlot({
       for (i in 1:length(comp)) {
-        if (input$comp1==comp[i]) {plot(dot_go1[[i]][[1]])}
-      }
-    })
-    
-    output$dot2 <- renderPlot({
-      for (i in 1:length(comp)) {
         if (input$comp1==comp[i]) {
-          if (length(dot_go)>1) {plot(dot_go1[[i]][[2]])}
-        }
-      }
-    })
-    
-    output$dot3 <- renderPlot({
-      for (i in 1:length(comp)) {
-        if (input$comp1==comp[i]) {
-          if (length(dot_go)>2) {plot(dot_go1[[i]][[3]])}
+          if (input$go_dom=="Biological Process") {
+            if (length(dot_go1[[i]][["Biological Process"]])>0) {plot(dot_go1[[i]][["Biological Process"]])}
+          }
+          if (input$go_dom=="Cellular Component") {
+            if (length(dot_go1[[i]][["Cellular Component"]])>0) {plot(dot_go1[[i]][["Cellular Component"]])}
+          }
+          if (input$go_dom=="Molecular Function") {
+            if (length(dot_go1[[i]][["Molecular Function"]])>0) {plot(dot_go1[[i]][["Molecular Function"]])}
+          }
         }
       }
     })
     
     output$hist1 <- renderPlot({
       for (i in 1:length(comp)) {
-        if (input$comp1==comp[i]) {plot(hist_go_a[[i]][[1]])}
-      }
-    })
-    
-    output$hist2 <- renderPlot({
-      for (i in 1:length(comp)) {
         if (input$comp1==comp[i]) {
-          if (length(hist_go_a[[i]])>1) {plot(hist_go_a[[i]][[2]])}
+          if (input$go_dom=="Biological Process") {
+            if (length(hist_go_a[[i]][["Biological Process"]])>0) {plot(hist_go_a[[i]][["Biological Process"]])}
+          }
+          if (input$go_dom=="Cellular Component") {
+            if (length(hist_go_a[[i]][["Cellular Component"]])>0) {plot(hist_go_a[[i]][["Cellular Component"]])}
+          }
+          if (input$go_dom=="Molecular Function") {
+            if (length(hist_go_a[[i]][["Molecular Function"]])>0) {plot(hist_go_a[[i]][["Molecular Function"]])}
+          }
         }
       }
     })
     
-    output$hist3 <- renderPlot({
-      for (i in 1:length(comp)) {
-        if (input$comp1==comp[i]) {
-          if (length(hist_go_a[[i]])>2) {plot(hist_go_a[[i]][[3]])}
-        }
-      }
-    })
   }
   ## Pathway analysis
   if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))){
@@ -525,7 +533,11 @@ shinyServer(function(input, output, session) {
                                                                                                    }),
                                                                                                    hr()
                                                                                             ),
+                                                                                            column(12,plotOutput("tree",height = "1000px")),
                                                                                             column(2,offset=0,
+                                                                                                   wellPanel(
+                                                                                                     selectInput("go_dom", "Choose a GO domain:", choices = c("Biological Process","Cellular Component","Molecular Function"))
+                                                                                                   ),
                                                                                                    wellPanel(
                                                                                                      numericInput("n_cat", "Number of categories to view:", 5)
                                                                                                    ),
@@ -547,18 +559,11 @@ shinyServer(function(input, output, session) {
                                                                                                    hr()
                                                                                             ),
                                                                                             column(10,
-                                                                                                   visNetworkOutput("network",height = "700px"),
-                                                                                                   visNetworkOutput("network1",height = "700px"),
-                                                                                                   visNetworkOutput("network2",height = "700px")
+                                                                                                   visNetworkOutput("network",height = "700px")
                                                                                             ),
                                                                                             column(12,
-                                                                                                   plotOutput("tree",height = "1000px"),
                                                                                                    plotOutput("dot1",height = "800px"),
-                                                                                                   plotOutput("dot2",height = "800px"),
-                                                                                                   plotOutput("dot3",height = "800px"),
-                                                                                                   plotOutput("hist1",height = "800px"),
-                                                                                                   plotOutput("hist2",height = "800px"),
-                                                                                                   plotOutput("hist3",height = "800px")
+                                                                                                   plotOutput("hist1",height = "800px")
                                                                                             )
                                                                                           )
     )
