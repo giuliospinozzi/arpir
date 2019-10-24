@@ -272,6 +272,16 @@ if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
         plot(cnet_go)
       }
     }
+    hist=list.files(path=paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology"),
+                            pattern = "hist_.*\\.pdf",
+                            full.names = T)
+    if (length(hist)>0) {
+      for (j in 1:length(hist)) {
+        hist_go=image_read_pdf(hist[j])
+        plot(hist_go)
+      }
+    }
+
   }
 }
 
@@ -290,7 +300,7 @@ The outputs obtained are a dotplot and a cnetplot. In both are shown the five mo
 ")}
 ```
 
-```{r comment="", results='asis', fig.align='center', message=FALSE, out.width = "100%", dpi = 500}
+```{r comment="", results='asis', fig.align='center', message=FALSE, out.width = "100%", out.height="100%", dpi = 500}
 if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
   for (i in 1:length(comp)) {
     cat(paste0("\n\n###",comp[i]),"\n\n\n")
@@ -301,6 +311,10 @@ if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
     if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/cnetplot_pathways.png"))) {
       cnet_path=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/cnetplot_pathways.pdf"))
       plot(cnet_path)
+    }
+    if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/hist_pathway.png"))) {
+      hist_path=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/hist_pathway.pdf"))
+      plot(hist_path)
     }
   }
 }

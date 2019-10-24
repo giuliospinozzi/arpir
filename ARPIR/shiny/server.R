@@ -121,6 +121,9 @@ shinyServer(function(input, output, session) {
     path1=list()
     dot=list()
     dotp=list()
+    hist_go=list()
+    hist_go_a=list()
+    hist_path=list()
     for (j in 1:length(comp)) {
       if (file.exists(paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology/tab_GO_genes.csv"))){
         GO=read.csv(paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology/GO_fc1.5_pv0.05.csv"))
@@ -141,6 +144,14 @@ shinyServer(function(input, output, session) {
           dot_go=list.append(dot_go,image_read_pdf(dotp[[j]][i]))
         }
         dot_go1=list.append(dot_go1,dot_go)
+        hist_go=list.append(hist_go,list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+                                               pattern = "hist_.*\\.png",
+                                               full.names = T))
+        hist_go1=list()
+        for (i in 1:length(hist_go[[j]])) {
+          hist_go1=list.append(hist_go1,image_read(hist_go[[j]][i]))
+        }
+        hist_go_a=list.append(hist_go_a,hist_go1)
       }
       if (file.exists(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))){
         path=read.csv(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/pathway_FC1.5_pv0.05.csv"))
@@ -150,6 +161,7 @@ shinyServer(function(input, output, session) {
         }
         path1=list.append(path1,path)
         dot=list.append(dot,image_read_pdf(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf")))
+        hist_path=list.append(hist_path,image_read(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/hist_pathway.png")))
       }
       incProgress(1/n)
     }
@@ -410,9 +422,30 @@ shinyServer(function(input, output, session) {
         }
       }
     })
-  }
-    ## Pathway analysis
     
+    output$hist1 <- renderPlot({
+      for (i in 1:length(comp)) {
+        if (input$comp1==comp[i]) {plot(hist_go_a[[i]][[1]])}
+      }
+    })
+    
+    output$hist2 <- renderPlot({
+      for (i in 1:length(comp)) {
+        if (input$comp1==comp[i]) {
+          if (length(hist_go_a[[i]])>1) {plot(hist_go_a[[i]][[2]])}
+        }
+      }
+    })
+    
+    output$hist3 <- renderPlot({
+      for (i in 1:length(comp)) {
+        if (input$comp1==comp[i]) {
+          if (length(hist_go_a[[i]])>2) {plot(hist_go_a[[i]][[3]])}
+        }
+      }
+    })
+  }
+  ## Pathway analysis
   if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))){
     
     for (i in 1:length(comp)) {
@@ -462,6 +495,12 @@ shinyServer(function(input, output, session) {
     output$dot <- renderPlot({
       for (i in 1:length(comp)) {
         if (input$comp1==comp[i]) {plot(dot[[i]])}
+      }
+    })
+    
+    output$hist4 <- renderPlot({
+      for (i in 1:length(comp)) {
+        if (input$comp1==comp[i]) {plot(hist_path[[i]])}
       }
     })
     
@@ -516,7 +555,10 @@ shinyServer(function(input, output, session) {
                                                                                                    plotOutput("tree",height = "1000px"),
                                                                                                    plotOutput("dot1",height = "800px"),
                                                                                                    plotOutput("dot2",height = "800px"),
-                                                                                                   plotOutput("dot3",height = "800px")
+                                                                                                   plotOutput("dot3",height = "800px"),
+                                                                                                   plotOutput("hist1",height = "800px"),
+                                                                                                   plotOutput("hist2",height = "800px"),
+                                                                                                   plotOutput("hist3",height = "800px")
                                                                                             )
                                                                                           )
     )
@@ -555,7 +597,8 @@ shinyServer(function(input, output, session) {
                                                                                                    visNetworkOutput("network_path",height = "700px")
                                                                                             ),
                                                                                             column(12,align="center",
-                                                                                                   plotOutput("dot",height = "700px"))
+                                                                                                   plotOutput("dot",height = "700px"),
+                                                                                                   plotOutput("hist4",height = "800px"))
                                                                                           ))
     do.call(tabsetPanel, panels)
   })

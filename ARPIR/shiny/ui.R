@@ -54,16 +54,16 @@ shinyUI(fluidPage(
                                  tags$head(tags$style("#text{color: red;
                                                       font-size: 14px;
                                                       }"
-                        )
+                                 )
                                  ),
-                        br(),
-                        tags$b("Summary table"),
-                        br(),
-                        br(),
-                        tableOutput("gen_sum"),
-                        br(),
-                        tableOutput("sam_sum"))
-                                 )),
+                                 br(),
+                                 tags$b("Summary table"),
+                                 br(),
+                                 br(),
+                                 tableOutput("gen_sum"),
+                                 br(),
+                                 tableOutput("sam_sum"))
+                        )),
                tabPanel("FastQ quality",
                         br(),
                         fluidRow(
@@ -168,6 +168,6 @@ shinyUI(fluidPage(
                           )
                         ))
                
-               ))
-  ))
+    ))
+))
 
