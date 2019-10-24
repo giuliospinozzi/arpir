@@ -349,8 +349,8 @@ def main():
         if args.meta == 'full':
             metaanalysis(args.output_dir,args.R_path,args.project_name,args.pool_name,args.dea_method,args.max_cat,comp1[i])
 
-        # final report
-        report(args.output_dir,args.project_name,args.pool_name)
+    # final report
+    report(args.output_dir,args.project_name,args.pool_name)
     
 
 # sentinel
