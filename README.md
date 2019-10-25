@@ -115,7 +115,7 @@ Finally, in the case of BWA, the necessary command is:<br>
 ### Graphical User Interface
 #### Usage
 ```bash GUI_ARPIR.sh``` <br>
-<p align="justify"> A series of windows allow to indicate input files and to choose between various options.</p>
+<p align="justify"> A series of windows allows to indicate input files and to choose between various options.</p>
 
 #### Example
 ```bash /path/to/script/ARPIR/GUI_ARPIR.sh ``` <br>
