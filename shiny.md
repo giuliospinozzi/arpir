@@ -25,9 +25,9 @@
 ## Meta-analysis
 ### GO analysis
 <p align="center"><img src="/images/shiny5_GO.png" width="100%"></p>
-<p align="justify"> The outputs of the Gene Ontology analysis are two summary tables, the first one showing a GO term for each line while the second one a gene for each line. Then follow three interactive networks, one for each category of GO, which allow to view the enriched genes and their Fold Change. Finally, there are a treemap, where the size of each rectangle is proportional to the number of genes, and three dotplots, which report the five terms of GO that were more enriched for the genes.</p>
+<p align="justify"> The outputs of the Gene Ontology analysis are two summary tables, the first one showing a GO term for each line while the second one a gene for each line. Then follow three interactive networks, one for each category of GO, which allow to view the enriched genes and their Fold Change. Finally, there are a treemap, where the size of each rectangle is proportional to the number of genes, three dotplots, which report the five terms of GO that were more enriched for the genes, and three histograms with up and downregulated gene counting in the first thirty GO terms.</p>
 
 ### Pathway analysis
 <p align="center"><img src="/images/shiny6_path.png" width="100%"></p>
-<p align="justify"> For the pathway analysis a summary table with enriched pathways is shown, followed by an interactive network similar to that of GO. Finally, there is a dotplot with the five most enriched pathways. </p>
+<p align="justify"> For the pathway analysis a summary table with enriched pathways is shown, followed by an interactive network similar to that of GO. Finally, there are a dotplot with the five most enriched pathways and a histogram with the thirty most enriched pathways. </p>
 <p align="center"><img src="/images/shiny7_path1.png" width="100%"></p>
