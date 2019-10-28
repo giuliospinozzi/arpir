@@ -80,7 +80,7 @@ Finally, in the case of BWA, the necessary command is:<br>
 ------------ | -------------
 ```-n```	| Project name. No default options. <br>
 ```-pn```	| Pool name. No default options. <br>
-```-sn```	| Sample names (',' sep, first controls). No default options. <br>
+```-sn```	| Sample names (',' sep). No default options. <br>
 ```-r1```	| Read 1 fastq path (',' sep). No default options. Files must appear in the same order as sample names. <br>
 ```-r2```	| Read 2 fastq path (',' sep). Required only for paired-end analysis. Files must appear in the same order as sample names. <br>
 ```-type```	| Sample types (',' sep). No default options. Types must appear in the same order as sample names. <br>
