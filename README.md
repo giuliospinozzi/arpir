@@ -81,8 +81,8 @@ Finally, in the case of BWA, the necessary command is:<br>
 ```-n```	| Project name. No default options. <br>
 ```-pn```	| Pool name. No default options. <br>
 ```-sn```	| Sample names (',' sep). No default options. <br>
-```-r1```	| Read 1 fastq path (',' sep). No default options. Files must appear in the same order as sample names. <br>
-```-r2```	| Read 2 fastq path (',' sep). Required only for paired-end analysis. Files must appear in the same order as sample names. <br>
+```-r1```	| Read 1 FastQ path (',' sep). No default options. Files must appear in the same order as sample names. <br>
+```-r2```	| Read 2 FastQ path (',' sep). Required only for paired-end analysis. Files must appear in the same order as sample names. <br>
 ```-type```	| Sample types (',' sep). No default options. Types must appear in the same order as sample names. <br>
 ```-comp```	| Comparisons between samples (allows multiple comparisons comma separated). No default option. <br>
 ```-o``` | Output directory. No default options. <br>
@@ -91,9 +91,9 @@ Finally, in the case of BWA, the necessary command is:<br>
 | | |
 ------------ | -------------
 ```-rb```	| Reference genome file path for bowtie. Default: `/opt/genome/human/hg19/index/bowtie2/hg19` <br>
-```-rh```	| Reference genome file path for hisat2. Default: `/opt/genome/human/hg19/index/hisat2/hg19` <br>
+```-rh```	| Reference genome file path for HISAT2. Default: `/opt/genome/human/hg19/index/hisat2/hg19` <br>
 ```-bed```	| Reference genome annotation file path. Default: `/opt/genome/human/hg19/annotation/hg19.refseq.bed12` <br>
-```-ph```	| Phix genome file path. Default: `/opt/genome/control/phix174/bwa/phiX174.fa` <br>
+```-ph```	| PhiX genome file path. Default: `/opt/genome/control/phix174/bwa/phiX174.fa` <br>
 ```-rib1```	| Ribosomal genome file path. Default: `/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa` <br>
 ```-rib2```	| Ribosomal genome file path. Default: `/opt/genome/human/hg19/contam/bwa/humRibosomal.fa` <br>
 ```-t```	| Max thread number. Default: 12. <br>
