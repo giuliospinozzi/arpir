@@ -7,7 +7,7 @@
 
 ## Summary
 <p align="center"><img src="/images/shiny1_summary.png" width="75%"></p>
-<p align="justify"> The summary contains two tables. The first table shows the parameters chosen for the analysis, while the second shows a summary for the various samples. In particular, for each sample is reported the type (control or treated), the number of raw reads, which are the reads in the initial FastQ file, the number of Phix reads, which are the reads removed because they are part of Phix contaminating genome, and the number of ribosomal reads, which are instead the reads removed because belonging to the ribosomal DNA. </p>
+<p align="justify"> The summary contains two tables. The first table shows the parameters chosen for the analysis, while the second shows a summary for the various samples. In particular, for each sample is reported the type (control or treated), the number of raw reads, which are the reads in the initial FastQ file, the number of PhiX reads, which are the reads removed because they are part of PhiX contaminating genome, and the number of ribosomal reads, which are instead the reads removed because belonging to the ribosomal DNA. </p>
 <p align="justify"> In sidebar there is a button that allows to download all the results in a report in pdf, in html or in word. </p>
 
 ## FastQ quality
@@ -20,7 +20,7 @@
 
 ## Differential expression analysis
 <p align="center"><img src="/images/shiny4_DEA.png" width="100%"></p>
-<p align="justify"> For the differential expression analysis, a summary table with the results and FPKM values for each sample is given. Then follows a series of summary plots and in particular: a PCA to evaluate the differences between the samples; a volcano plot, which reports the values of Fold Change and p-value for all genes; a heatmap of the 100 genes with greater variance, in which the value of the Z-score is reported and therefore the distance from the mean for the various samples; a heatmap showing the distances between the samples, calculated in a distance matrix using the euclidean distance method. </p>
+<p align="justify"> For the differential expression analysis, a summary table with the results and FPKM values for each sample is given. Then follows a series of summary plots and in particular: a PCA to evaluate the differences between the samples; a volcano plot, which reports the values of Fold Change and p-value for all genes; a heatmap of the 100 genes with greater variance, in which the value of the Z-score is reported and therefore the distance from the mean for the various samples; a heatmap showing the distances between the samples, calculated in a distance matrix using the Euclidean distance method. </p>
 
 ## Meta-analysis
 ### GO analysis
