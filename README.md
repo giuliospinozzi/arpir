@@ -84,7 +84,7 @@ Finally, in the case of BWA, the necessary command is:<br>
 ```-r1```	| Read 1 FastQ path (',' sep). No default options. Files must appear in the same order as sample names. <br>
 ```-r2```	| Read 2 FastQ path (',' sep). Required only for paired-end analysis. Files must appear in the same order as sample names. <br>
 ```-type```	| Sample types (',' sep). No default options. Types must appear in the same order as sample names. <br>
-```-comp```	| Comparisons between samples (allows multiple comparisons comma separated). No default option. <br>
+```-comp```	| Comparisons between samples (allows multiple comparisons comma separated). No default options. <br>
 ```-o``` | Output directory. No default options. <br>
 
 #### Options
