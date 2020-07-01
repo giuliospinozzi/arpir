@@ -22,7 +22,7 @@
 <p align="center"><img src="/images/shiny4_DEA.png" width="100%"></p>
 <p align="justify"> For the differential expression analysis, a summary table with the results and FPKM values for each sample is given. Then follows a series of summary plots and in particular: a PCA to evaluate the differences between the samples; a volcano plot, which reports the values of Fold Change and p-value for all genes; a heatmap of the 100 genes with greater variance, in which the value of the Z-score is reported and therefore the distance from the mean for the various samples; a heatmap showing the distances between the samples, calculated in a distance matrix using the Euclidean distance method. </p>
 
-## Meta-analysis
+## Tertiary-analysis
 ### GO analysis
 <p align="center"><img src="/images/shiny5_GO.png" width="100%"></p>
 <p align="justify"> The outputs of the Gene Ontology analysis are two summary tables, the first one showing a GO term for each line while the second one a gene for each line. Then follow three interactive networks, one for each category of GO, which allow to view the enriched genes and their Fold Change. Finally, there are a treemap, where the size of each rectangle is proportional to the number of genes, three dotplots, which report the five terms of GO that were more enriched for the genes, and three histograms with up and downregulated gene counting in the first thirty GO terms.</p>
