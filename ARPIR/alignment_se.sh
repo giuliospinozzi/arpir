@@ -36,15 +36,16 @@ echo "
 	6. MAXTHREADS [12]
 	7. REFERENCE_GENOME_BOWTIE [/opt/genome/human/hg19/index/bowtie2/hg19]
 	8. REFERENCE_GENOME_HISAT2 [/opt/genome/human/hg19/index/hisat2/hg19]
-	9. BED_FILE [/opt/genome/human/hg19/annotation/hg19.refseq.bed12]
-	10. PHIX_GENOME [/opt/genome/control/phix174/bwa/phiX174.fa]
-	11. RIBOSOMAL_GENOME_hum5SrDNA [/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa]
-	12. RIBOSOMAL_GENOME_humRibosomal [/opt/genome/human/hg19/contam/bwa/humRibosomal.fa]
-	13. ANALYSIS_PROTOCOL [tophat,hisat]
-	14. GTF_FILE [/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf]
-	15. LIBRARY_TYPE [fr-firststrand,fr-secondstrand]
-	16. SAMPLE_TYPE [cntrl,treat]
-	17. SCRIPT_DIR [/opt/applications/src/arpir/ARPIR]
+	9. REFERENCE_GENOME_STAR [/opt/genome/human/hg19/index/STAR]
+	10. BED_FILE [/opt/genome/human/hg19/annotation/hg19.refseq.bed12]
+	11. PHIX_GENOME [/opt/genome/control/phix174/bwa/phiX174.fa]
+	12. RIBOSOMAL_GENOME_hum5SrDNA [/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa]
+	13. RIBOSOMAL_GENOME_humRibosomal [/opt/genome/human/hg19/contam/bwa/humRibosomal.fa]
+	14. ANALYSIS_PROTOCOL [tophat,hisat,star]
+	15. GTF_FILE [/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf]
+	16. LIBRARY_TYPE [fr-firststrand,fr-secondstrand]
+	17. SAMPLE_TYPE [cntrl,treat]
+	18. SCRIPT_DIR [/opt/applications/src/arpir/ARPIR]
 "
 printf "${GREEN}[CREO] RNAseq Pipeline ${NC}\n"
 printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${YELLOW}[CREO] Preprocessing input variables (delimiters:<>)${NC}\n"
@@ -67,15 +68,16 @@ R1_FASTQ="${5}";
 MAXTHREADS="${6}";
 REFERENCE_GENOME_BOWTIE="${7}";
 REFERENCE_GENOME_HISAT2="${8}";
-BED_FILE="${9}";
-PHIX_GENOME="${10}";
-RIBOSOMAL_GENOME_hum5SrDNA="${11}";
-RIBOSOMAL_GENOME_humRibosomal="${12}";
-ANALYSIS_PROTOCOL="${13}";
-GTF_FILE="${14}";
-LIBRARY_TYPE="${15}";
-SAMPLE_TYPE="${16}";
-SCRIPT_DIR="${17}";
+REFERENCE_GENOME_STAR="${9}";
+BED_FILE="${10}";
+PHIX_GENOME="${11}";
+RIBOSOMAL_GENOME_hum5SrDNA="${12}";
+RIBOSOMAL_GENOME_humRibosomal="${13}";
+ANALYSIS_PROTOCOL="${14}";
+GTF_FILE="${15}";
+LIBRARY_TYPE="${16}";
+SAMPLE_TYPE="${17}";
+SCRIPT_DIR="${18}";
 
 printf "${GREEN}@@@@ Folder creation --> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}${NC}\n"
 
@@ -209,6 +211,36 @@ elif [ ${ANALYSIS_PROTOCOL} = "hisat"  ]; then
 #	read_quality.py -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
 	bamCoverage -p ${MAXTHREADS} -b ${BAM} --outFileFormat bigwig -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.bw
 	bamCoverage -p ${MAXTHREADS} -b ${BAM} --outFileFormat bedgraph -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.bedgraph
+
+elif [ ${ANALYSIS_PROTOCOL} = "star"  ]; then
+	mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR
+	mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}
+	mkdir ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC
+	printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${YELLOW}##### Mapping Reads to the Genome #####${NC}\n"
+	printf "${GREEN}@@@@ Splicing read mapping --> STAR${NC}\n"
+	STAR --runMode alignReads  --runThreadN ${MAXTHREADS} --genomeDir ${REFERENCE_GENOME_STAR} --readFilesCommand zcat --outFileNamePrefix ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME} --readFilesIn ${R1_FASTQ};
+	samtools view -@ ${MAXTHREADS} -b -S ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.sam > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.bam;
+	rm ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.sam; 
+	samtools sort -@ ${MAXTHREADS} ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.bam > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam;
+	rm ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.bam;
+	samtools index ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam;
+	BAM="${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam";
+	READS_MAPPED_1=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}Log.final.out | grep 'Uniquely mapped reads number' | cut -f2`)) ;
+	READS_MAPPED_2=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}Log.final.out | grep 'Number of reads mapped to multiple loci' | cut -f2`)) ;
+	READS_MAPPED=$(($READS_MAPPED_1 + $READS_MAPPED_2));
+	printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${RED}##### READS MAPPED: ${READS_MAPPED} #####${NC}\n"
+	cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input_all.csv && echo "${LIBRARY_NAME},${BAM},${SAMPLE_TYPE}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input_all.csv
+	printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${YELLOW}####### RSeQC Report #######${NC}\n"
+	inner_distance.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+	junction_annotation.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+#	read_duplication.py -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+	junction_saturation.py -r ${BED_FILE} -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+	bam_stat.py -i ${BAM} > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME}.bam_stat.txt;
+	read_distribution.py -r ${BED_FILE} -i ${BAM} > ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME}.read_distribution.txt;
+#	geneBody_coverage.py -r ${BED_FILE}  -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+#	read_quality.py -i ${BAM} -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/RSeQC/${LIBRARY_NAME};
+	bamCoverage -p ${MAXTHREADS} -b ${BAM} --outFileFormat bigwig -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.bw
+	bamCoverage -p ${MAXTHREADS} -b ${BAM} --outFileFormat bedgraph -o ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/STAR/${LIBRARY_NAME}/${LIBRARY_NAME}.bedgraph
 fi
 
 cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/reports/sample_report.csv && echo -e "${LIBRARY_NAME}\t${SAMPLE_TYPE}\t${NUMBER_RAW_READS}\t${NUMBER_PHIX_READS}\t${NUMBER_RIBOSOMAL_READS}\t${READS_MAPPED}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/reports/sample_report.csv

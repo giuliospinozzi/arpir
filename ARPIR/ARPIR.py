@@ -28,13 +28,14 @@ header = """
   -type, --type [cntrl,treat]
   -rb, --reference-genome-bowtie [/opt/genome/human/hg19/index/bowtie2/hg19]
   -rh, --reference-genome-hisat2 [/opt/genome/human/hg19/index/hisat2/hg19]
+  -rs, --reference-genome-star [/opt/genome/human/hg19/index/STAR]
   -bed, --bed-file [/opt/genome/human/hg19/annotation/hg19.refseq.bed12]
   -ph, --phix-genome [/opt/genome/control/phix174/bwa/phiX174.fa]
   -rib1, --ribosomal-genome1 [/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa]
   -rib2, --ribosomal-genome2 [/opt/genome/human/hg19/contam/bwa/humRibosomal.fa]
   -t, --threads [12]
   -g, --gtf [/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf]
-  -a, --alignment-method [hisat,tophat]
+  -a, --alignment-method [hisat,tophat,star]
   -l, --library-type [fr-firststrand,fr-secondstrand]
   -q, --quantification-method [featureCounts,Cufflinks]
   -r, --reference-genome [/opt/genome/human/hg19/index/hg19.fa]
@@ -68,13 +69,14 @@ parser.add_argument('-r2', '--read2', dest="read2", help="Read 2 fastq path (','
 parser.add_argument('-type', '--type', dest="stype", help="Sample types (cntrl,treat). \n No default option. \n", action="store", required=True)
 parser.add_argument('-rb', '--reference-genome-bowtie', dest="ref_bowtie", help="Reference genome file path for bowtie. \n Default: /opt/genome/human/hg19/index/bowtie2/hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/bowtie2/hg19")
 parser.add_argument('-rh', '--reference-genome-hisat2', dest="ref_hisat2", help="Reference genome file path for hisat2. \n Default: /opt/genome/human/hg19/index/hisat2/hg19. \n", action="store", required=False, default="/opt/genome/human/hg19/index/hisat2/hg19")
+parser.add_argument('-rs', '--reference-genome-star', dest="ref_star", help="Reference genome file path for STAR. \n Default: /opt/genome/human/hg19/index/STAR. \n", action="store", required=False, default="/opt/genome/human/hg19/index/STAR")
 parser.add_argument('-bed', '--bed-file', dest="bed_file", help="Reference genome annotation file path. \n Default: /opt/genome/human/hg19/annotation/hg19.refseq.bed12. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refseq.bed12")
 parser.add_argument('-ph', '--phix-genome', dest="phix", help="Phix genome file path. \n Default: /opt/genome/control/phix174/bwa/phiX174.fa. \n", action="store", required=False, default="/opt/genome/control/phix174/bwa/phiX174.fa")
 parser.add_argument('-rib1', '--ribosomal-genome1', dest="rib1", help="Ribosomal genome file path. \n Default: /opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa. \n", action="store", required=False, default="/opt/genome/human/hg19/contam/bwa/hum5SrDNA.fa")
 parser.add_argument('-rib2', '--ribosomal-genome2', dest="rib2", help="Ribosomal genome file path. \n Default: /opt/genome/human/hg19/contam/bwa/humRibosomal.fa. \n", action="store", required=False, default="/opt/genome/human/hg19/contam/bwa/humRibosomal.fa")
 parser.add_argument('-t', '--threads', dest="Threads", help="Max thread number. \n Default: 12. \n", action="store", required=False, default=12)
 parser.add_argument('-g', '--gtf', dest="GTF", help="GTF file path. \n Default: /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf. \n", action="store", required=False, default="/opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf")
-parser.add_argument('-a', '--alignment-method', dest="a_method", help="Alignment method. \n Default: hisat; alternative: tophat. \n", action="store", required=False, default="hisat")
+parser.add_argument('-a', '--alignment-method', dest="a_method", help="Alignment method. \n Default: hisat; alternative: star,tophat. \n", action="store", required=False, default="hisat")
 parser.add_argument('-l', '--library-type', dest="library_type", help="Library type. \n Default: fr-firststrand; alternative: fr-secondstrand. \n", action="store", required=False, default="fr-firststrand")
 #parser.add_argument('-i', '--input', dest="input_path", help="Input path dataframe. \n No default option. \n", action="store", required=True)
 parser.add_argument('-q', '--quantification-method', dest="q_method", help="Quantification method. \n Default: featureCounts; alternative: Cufflinks. \n", action="store", required=False, default="featureCounts")
@@ -109,6 +111,7 @@ def checkArgs(args):
     print "Sample types =", args.stype, "\n"
     print "Reference genome for bowtie =", args.ref_bowtie, "\n"
     print "Reference genome for hisat2 =", args.ref_hisat2, "\n"
+    print "Reference genome for star =", args.ref_star, "\n"
     print "Bed file =", args.bed_file, "\n"
     print "Phix genome file =", args.phix, "\n"
     print "Ribosomal genome file 1 =", args.rib1, "\n"
@@ -138,6 +141,10 @@ def checkArgs(args):
     if not os.path.isdir(args.output_dir):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid path for output dir.\n\tExit\n" + '\033[0m')
         sys.exit()
+    if args.a_method == "star":
+        if not os.path.isdir(args.ref_star):
+            print ('\033[0;31m' + "\n[AP]\tError while reading files: no valid paths for index genome (star).\n\tExit\n" + '\033[0m')
+            sys.exit()
     if args.a_method == "hisat":
         h=args.ref_hisat2+".fa"
         if not os.path.isfile(h):
@@ -224,7 +231,7 @@ def checkFile(read1,read2,stype,sample_name):
     
 
 
-def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,ref_bowtie,ref_hisat2,bed_file,phix,rib1,rib2,a_method,GTF,library_type,R_path,stype,q_method,dea_method,comp):
+def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,ref_bowtie,ref_hisat2,ref_star,bed_file,phix,rib1,rib2,a_method,GTF,library_type,R_path,stype,q_method,dea_method,comp):
     """
     Run alignment script as desired
     """
@@ -269,11 +276,11 @@ def alignment(project_name,pool_name,sample_name,output_dir,read1,read2,Threads,
     if read2 != "":
         read2a=read2.split(",")
         for i in range(0, (len(read1a))):
-            cmd="bash "+R_path+"/alignment.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+read2a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+R_path
+            cmd="bash "+R_path+"/alignment.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+read2a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+ref_star+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+R_path
             os.system(cmd)
     if read2 == "":
         for i in range(0, (len(read1a))):
-            cmd="bash "+R_path+"/alignment_se.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+R_path
+            cmd="bash "+R_path+"/alignment_se.sh "+project_name+" "+pool_name+" "+sample_name1[i]+" "+output_dir+" "+read1a[i]+" "+str(Threads)+" "+ref_bowtie+" "+ref_hisat2+" "+ref_star+" "+bed_file+" "+phix+" "+rib1+" "+rib2+" "+a_method+" "+GTF+" "+library_type+" "+stype1[i]+" "+R_path
             os.system(cmd)
 
 
@@ -324,7 +331,7 @@ def main():
     checkFile(args.read1,args.read2,args.stype,args.sample_name)
 
     # alignment
-    alignment(args.project_name,args.pool_name,args.sample_name,args.output_dir,args.read1,args.read2,args.Threads,args.ref_bowtie,args.ref_hisat2,args.bed_file,args.phix,args.rib1,args.rib2,args.a_method,args.GTF,args.library_type,args.R_path,args.stype,args.q_method,args.dea_method,args.comp)
+    alignment(args.project_name,args.pool_name,args.sample_name,args.output_dir,args.read1,args.read2,args.Threads,args.ref_bowtie,args.ref_hisat2,args.ref_star,args.bed_file,args.phix,args.rib1,args.rib2,args.a_method,args.GTF,args.library_type,args.R_path,args.stype,args.q_method,args.dea_method,args.comp)
 
     comp1=args.comp.split(",")
     for i in range(0, (len(comp1))):

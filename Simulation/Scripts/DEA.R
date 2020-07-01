@@ -152,3 +152,14 @@ save(so,file="sleuth.RData")
 # res=res[!is.na(res$pval),]
 # write.csv(res,"kallisto.csv")
 
+
+##### STAR #####
+
+#### EDGER ####
+
+
+#### DESEQ2 ####
+
+
+#### CUMMERBUND ####
+

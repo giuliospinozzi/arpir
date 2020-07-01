@@ -114,6 +114,11 @@ if (gen_sum[3,1]=="hisat") {
 
 The rna-strandness option is used to specify the strand-specific information, that can be of three types: unstrand, FR, RF. FR (corresponding to fr-secondstrand) means a read corresponds to a transcript, while RF (corresponding to fr-firststrand) means a read corresponds to the reverse complemented counterpart of a transcript, while the unstrand both. The deafult option is fr-firststrand (RF), which can be changed to fr-secondstrand (FR) among the initial options.  ")
 }
+
+if (gen_sum[3,1]=="star") {
+  cat("Spliced Transcripts Alignment to a Reference (STAR) software is based on a RNA-seq alignment algorithm that uses sequential maximum mappable seed search in uncompressed suffix arrays followed by seed clustering and stitching procedure.
+  ")
+}
 ```
 
 The quality of the BAM files was evaluated using RSeQC software, using a series of python scripts for creating different plots and in particular: inner_distance, which serves to measure the distribution of the internal distance between paired reads; junction_annotation, which determines which splice junctions are known, completely new or partially new based on the reference genome; junction_saturation, which determines whether the sequencing depth is sufficient for alternative splicing analysis; bam_stat, which makes statistics on read mapping; read_distribution, which calculates the fraction of reads mapped to the coding exon portion, the 5'-UTR region, the 3'-UTR region and the intron or intragenic regions.  
@@ -137,6 +142,7 @@ processFile = function(filepath,title) {
 
 if (gen_sum[3,1]=="hisat") {dir_a="/HISAT2/"}
 if (gen_sum[3,1]=="tophat") {dir_a="/TopHat2/"}
+if (gen_sum[3,1]=="star") {dir_a="/STAR/"}
 for (i in 1:length(sam)) {
   cat(paste0("\n\n",sam[i]),"\n\n")
   stat=list.files(path=paste0(out_dir,dir_a,sam[i],"/RSeQC"),patter="bam_stat.txt",full.names = T)
@@ -165,13 +171,13 @@ for (i in 1:length(sam)) {
 # Differential expression analysis
 ```{r comment="", results='asis'}
 if (gen_sum[5,1]=="Cufflinks") {
-  cat("The quantification was performed with Cufflinks, a software that, starting from the alignment output of TopHat2, proceeds first with the assembly of the transcripts, including all the different isoforms, then calculates the abundance and estimates the most likely by the value of likelihood.  
+  cat("The quantification was performed with Cufflinks, a software that, starting from the alignment output, proceeds first with the assembly of the transcripts, including all the different isoforms, then calculates the abundance and estimates the most likely by the value of likelihood.  
 
 ")
 }
 
 if (gen_sum[5,1]=="featureCounts") {
-  cat("The quantification was performed with featureCounts, a software that, starting from the alignment output of HISAT2, calculates the abundance of the transcripts using the simple method of reads count. The parameters used are the following:  
+  cat("The quantification was performed with featureCounts, a software that, starting from the alignment output, calculates the abundance of the transcripts using the simple method of reads count. The parameters used are the following:  
 
 * ```-p``` --- If specified, fragments (or templates) will be counted instead of reads.  
 
@@ -329,6 +335,7 @@ if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
 * H. Li and R. Durbin, "Fast and accurate short read alignment with Burrows-Wheeler transform," Bioinformatics, vol. 25, no. 14, pp. 1754-1760, 2009.
 * H. Li, "A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data," Bioinformatics, vol. 27, no. 21, pp. 2987-2993, 2011.
 * D. Kim, G. Pertea, C. Trapnell, H. Pimentel, R. Kelley, and S. L. Salzberg, "TopHat2: Accurate alignment of transcriptomes in the presence of insertions, deletions and gene fusions," Genome Biol., vol. 14, no. 4, 2013.
+* A. Dobin, C.A. Davis, F. Schlesinger, J. Drenkow, C. Zaleski, S. Jha, P. Batut, M. Chaisson, T.R. Gingeras, "STAR: ultrafast universal RNA-seq aligner," Bioinformatics, vol. 29, no. 1, pp. 15-21, 2013.
 * L. Wang, S. Wang, and W. Li, "RSeQC: quality control of RNA-seq experiments," Bioinformatics, vol. 28, no. 16, pp. 2184-2185, 2012.
 * D. Kim, B. Langmead, and S. L. Salzberg, "HISAT: A fast spliced aligner with low memory requirements," Nat. Methods, vol. 12, no. 4, pp. 357-360, 2015.
 * Y. Liao, G. K. Smyth, and W. Shi, "FeatureCounts: An efficient general purpose program for assigning sequence reads to genomic features," Bioinformatics, vol. 30, no. 7, pp. 923-930, 2014.

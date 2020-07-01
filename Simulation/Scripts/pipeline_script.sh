@@ -5,6 +5,7 @@ mkdir TopHat
 mkdir Hisat
 mkdir Hisat/StringTie
 mkdir kallisto
+mkdir STAR
 
 ## TOPHAT ##
 touch TopHat/cufflinks.transcripts.allsamples.txt
@@ -17,7 +18,7 @@ cufflinks --label "$(basename "$file" _1.fastq.gz)" --no-update-check --library-
 cat TopHat/cufflinks.transcripts.allsamples.txt && echo TopHat/"$(basename "$file" _1.fastq.gz)"/cufflinks/transcripts.gtf >> TopHat/cufflinks.transcripts.allsamples.txt; done
 cuffmerge -g /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf -s /opt/genome/human/hg19/index/hg19.fa -p 10 -o TopHat TopHat/cufflinks.transcripts.allsamples.txt
 for file in *_1.fastq.gz; do
-cuffquant -p10 --library-type  fr-firststrand --no-update-check -o TopHat/"$(basename "$file" _1.fastq.gz)"/cuffquant TopHat/merged.gtf TopHat/"$(basename "$file" _1.fastq.gz)"/accepted_hits.bam; done
+cuffquant -p 10 --library-type  fr-firststrand --no-update-check -o TopHat/"$(basename "$file" _1.fastq.gz)"/cuffquant TopHat/merged.gtf TopHat/"$(basename "$file" _1.fastq.gz)"/accepted_hits.bam; done
 cuffdiff -p 10 -L cntrl,treat -o TopHat/cuffdiff --library-type  fr-firststrand --no-update-check TopHat/merged.gtf TopHat/sample_01/cuffquant/abundances.cxb,TopHat/sample_02/cuffquant/abundances.cxb,TopHat/sample_03/cuffquant/abundances.cxb TopHat/sample_04/cuffquant/abundances.cxb,TopHat/sample_05/cuffquant/abundances.cxb,TopHat/sample_06/cuffquant/abundances.cxb
 
 
@@ -35,6 +36,27 @@ featureCounts -T 10 -p -a /opt/genome/human/hg19/annotation/hg19.refgene.sorted.
 for file in *_1.fastq.gz; do
 stringtie -p 10 -G /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf -e -B -o Hisat/StringTie/"$(basename "$file" _1.fastq.gz)"/transcripts.gtf -A Hisat/StringTie/"$(basename "$file" _1.fastq.gz)"/gene_abundances.tsv Hisat/"$(basename "$file" _1.fastq.gz).sorted.bam";
 perl Scripts/stringtie_expression_matrix.pl --expression_metric=FPKM --result_dirs=Hisat/StringTie/"$(basename "$file" _1.fastq.gz)" --transcript_matrix_file=Hisat/StringTie/"$(basename "$file" _1.fastq.gz)"/transcript_fpkm.tsv --gene_matrix_file=Hisat/StringTie/"$(basename "$file" _1.fastq.gz)"/gene_fpkm.tsv; done
+
+
+## STAR ##
+for file in *_1.fastq.gz; do
+STAR --runMode alignReads  --runThreadN 10 --genomeDir /opt/genome/human/hg19/index/STAR --readFilesCommand zcat --outFileNamePrefix "$(basename "$file" _1.fastq.gz)" --readFilesIn "$file" "$(basename "$file" 1.fastq.gz)2.fastq.gz";
+samtools view -@ 10 -b -S STAR/"$(basename "$file" _1.fastq.gz).sam" > STAR/"$(basename "$file" _1.fastq.gz).bam";
+samtools sort -@ 10 STAR/"$(basename "$file" _1.fastq.gz).bam" > STAR/"$(basename "$file" _1.fastq.gz).sorted.bam";
+samtools index STAR/"$(basename "$file" _1.fastq.gz).sorted.bam"; done
+
+## FEATURECOUNTS ##
+featureCounts -T 10 -p -a /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf -o STAR/featureCounts_counts.txt STAR/sample_01.sorted.bam STAR/sample_02.sorted.bam STAR/sample_03.sorted.bam STAR/sample_04.sorted.bam STAR/sample_05.sorted.bam STAR/sample_06.sorted.bam 
+
+## CUFFLINKS ##
+touch STAR/cufflinks.transcripts.allsamples.txt
+for file in *_1.fastq.gz; do
+cufflinks --label "$(basename "$file" _1.fastq.gz)" --no-update-check --library-type fr-firststrand --verbose --GTF /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf -p 10 -o STAR/"$(basename "$file" _1.fastq.gz)"/cufflinks STAR/"$(basename "$file" _1.fastq.gz).sorted.bam";
+cat STAR/cufflinks.transcripts.allsamples.txt && echo STAR/"$(basename "$file" _1.fastq.gz)"/cufflinks/transcripts.gtf >> STAR/cufflinks.transcripts.allsamples.txt; done
+cuffmerge -g /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf -s /opt/genome/human/hg19/index/hg19.fa -p 10 --no-update-check -o STAR STAR/cufflinks.transcripts.allsamples.txt
+for file in *_1.fastq.gz; do
+cuffquant -p 10 --library-type  fr-firststrand --no-update-check -o STAR/"$(basename "$file" _1.fastq.gz)"/cuffquant STAR/merged.gtf STAR/"$(basename "$file" _1.fastq.gz).sorted.bam"; done
+cuffdiff -p 10 -L cntrl,treat -o STAR/cuffdiff --library-type  fr-firststrand --no-update-check STAR/merged.gtf STAR/sample_01/cuffquant/abundances.cxb,STAR/sample_02/cuffquant/abundances.cxb,STAR/sample_03/cuffquant/abundances.cxb STAR/sample_04/cuffquant/abundances.cxb,STAR/sample_05/cuffquant/abundances.cxb,STAR/sample_06/cuffquant/abundances.cxb
 
 
 ## KALLISTO ##

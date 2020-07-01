@@ -2,7 +2,7 @@
 
 ## Space
 	LEFTSPACE=`df -P | grep 'sda' | awk '{print $4}'`
-	if [ ${LEFTSPACE} -lt 25600000 ]; then 
+	if [ ${LEFTSPACE} -lt 55000000 ]; then 
 		echo "
     
         *****************************************************************
@@ -11,7 +11,7 @@
         |                                                               |
         |   I WILL NOT PROCEED...                                       |
         |                                                               |       
-        |   FREE SPACE BEFORE, LEAVING AT LEAST 25GB ON HD              |
+        |   FREE SPACE BEFORE, LEAVING AT LEAST 55GB ON HD              |
         |                                                               |
         *****************************************************************
     
@@ -76,7 +76,7 @@
 
 ###################### DEPENDENCIES ######################
 
-	list_dependencies=(zenity r-base libcurl4-openssl-dev libmagick++-dev libmariadbclient-dev libssl-dev pandoc fastqc python-pip bwa samtools tophat hisat2 cufflinks pigz libgd-dev)
+	list_dependencies=(zenity r-base libcurl4-openssl-dev libmagick++-dev libmariadbclient-dev libssl-dev pandoc fastqc python-pip bwa samtools tophat hisat2 cufflinks pigz libgd-dev g++ make rna-star)
 	list_dependencies1=(argparse pandas multiqc RSeQC)
 
 	echo "STEP 1: DEPENDENCIES"
@@ -201,6 +201,12 @@
 	mkdir -p /opt/genome/human/hg19/index/hisat2
 	ln -s /opt/genome/human/hg19/index/hg19.fa /opt/genome/human/hg19/index/hisat2/hg19.fa
 	hisat2-build /opt/genome/human/hg19/index/hisat2/hg19.fa /opt/genome/human/hg19/index/hisat2/hg19
+
+	#star index
+	echo "Creating star index..."
+	mkdir -p /opt/genome/human/hg19/index/STAR
+	ln -s /opt/genome/human/hg19/index/hg19.fa /opt/genome/human/hg19/index/STAR/hg19.fa
+	STAR --runThreadN 8 --runMode genomeGenerate --genomeDir /opt/genome/human/hg19/index/STAR --genomeFastaFiles /opt/genome/human/hg19/index/STAR/hg19.fa --sjdbGTFfile /opt/genome/human/hg19/annotation/hg19.refgene.sorted.gtf
 
 	# # mouse genome
 	# sudo mkdir -p /opt/genome/mouse/mm10/index/bwa/

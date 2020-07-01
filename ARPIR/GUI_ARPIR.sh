@@ -45,6 +45,9 @@ zenity --info --title="Reference genome Hisat2" --text="Select reference genome 
 REF_HISAT=$(zenity --file-selection --filename /opt/genome/human/hg19/index/hisat2/hg19.fa --title="***Reference genome Hisat2***"  --text="Select reference genome for Hisat2")
 REF_HISAT=$(echo $REF_HISAT | sed s/.fa//g)
 
+zenity --info --title="Index reference genome STAR" --text="Select index directory for STAR" --ok-label="OK" 
+REF_STAR=$(zenity --file-selection --directory --filename /opt/genome/human/hg19/index/STAR --title="***Reference genome STAR***"  --text="Select reference genome directory for STAR")
+
 zenity --info --title="BED file" --text="Select BED file" --ok-label="OK" 
 BED=$(zenity --file-selection --filename /opt/genome/human/hg19/annotation/hg19.refseq.bed12 --title="***BED file***"  --text="Select BED file")
 
@@ -74,15 +77,25 @@ LOGF=$(zenity --file-selection --directory --filename /opt/ngs/logs --title="***
 
 library=$(zenity --list --text="Choose library type" --radiolist --column "" --column "Library type" --hide-header --title="Library type" TRUE "fr-firststrand" FALSE "fr-secondstrand")
 
-alignment=$(zenity --list --text="Choose alignment method" --radiolist --column "" --column "Alignment method" --hide-header --title="Alignment method" TRUE "hisat" FALSE "tophat")
+alignment=$(zenity --list --text="Choose alignment method" --radiolist --column "" --column "Alignment method" --hide-header --title="Alignment method" TRUE "hisat" FALSE "star" FALSE "tophat")
 
 if [ ${alignment} = "hisat" ]; then
 	quant="featureCounts";
-	dea=$(zenity --list --text="Choose differential expression analysis method" --radiolist --column "" --column "DEA method" --hide-header --title="DEA method" TRUE "edgeR" FALSE "DESeq2");
 fi
 
 if [ ${alignment} = "tophat" ]; then
 	quant="Cufflinks";
+fi
+
+if [ ${alignment} = "star" ]; then
+	quant=$(zenity --list --text="Choose quantification method" --radiolist --column "" --column "Quantification method" --hide-header --title="Quantification method" TRUE "featureCounts" FALSE "Cufflinks");
+fi
+
+if [ ${quant} = "featureCounts" ]; then
+	dea=$(zenity --list --text="Choose differential expression analysis method" --radiolist --column "" --column "DEA method" --hide-header --title="DEA method" TRUE "edgeR" FALSE "DESeq2");
+fi
+
+if [ ${quant} = "Cufflinks" ]; then
 	dea="cummeRbund";
 fi
 
@@ -116,6 +129,8 @@ bowtie = "$REF_BOWTIE"
 
 hisat = "$REF_HISAT"
 
+star = "$REF_STAR"
+
 BED_file = "$BED"
 
 phix_genome = "$PHIX"
@@ -141,14 +156,14 @@ threads = "$threads | zenity --text-info --title="Summary" --width=700 --height=
 if [ ${se_pe} = "Paired_end" ]; then
 	if [ "$?" -eq "0" ]; then
 		cd ${OUT}
-		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -r2 $READ2 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -meta $meta -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
+		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -r2 $READ2 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -rs $REF_STAR -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -meta $meta -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
 	fi
 fi
 
 if [ ${se_pe} = "Single_end" ]; then
 	if [ "$?" -eq "0" ]; then
 		cd ${OUT}
-		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -meta $meta -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
+		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -rs $REF_STAR -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -meta $meta -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
 	fi
 fi
 

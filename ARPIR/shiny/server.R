@@ -47,6 +47,7 @@ shinyServer(function(input, output, session) {
     ## BAM Quality
     if (gen_sum[3,1]=="hisat") {dir_a="/HISAT2/"}
     if (gen_sum[3,1]=="tophat") {dir_a="/TopHat2/"}
+    if (gen_sum[3,1]=="star") {dir_a="/STAR/"}
     stat=list()
     read_d=list()
     inn_d=list()
