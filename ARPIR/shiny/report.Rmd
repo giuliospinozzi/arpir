@@ -237,9 +237,9 @@ for (i in 1:length(comp)) {
 
 ```{r comment="", results='asis'}
 
-if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
+if (file.exists(paste0(out_dir,"/",comp[1],"/Tertiary-analysis"))) {
   
-cat("# Meta-analysis
+cat("# Tertiary-analysis
 
 ## Gene ontology
 
@@ -252,15 +252,15 @@ The outputs obtained are a treemap, three cnetplot and three dotplot (one for GO
 
 ```{r comment="", results='asis', fig.align='center', message=FALSE, out.width = "100%", out.height="100%", dpi = 500}
 
-if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
+if (file.exists(paste0(out_dir,"/",comp[1],"/Tertiary-analysis"))) {
 
   for (i in 1:length(comp)) {
     cat(paste0("\n\n###",comp[i]),"\n\n\n")
-    if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.png"))) {
-      tree=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.pdf"))
+    if (file.exists(paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.png"))) {
+      tree=image_read_pdf(paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.pdf"))
       plot(tree)
     }
-    dotp=list.files(path=paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology"),
+    dotp=list.files(path=paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Gene_ontology"),
                             pattern = "dotplot_GO_.*\\.pdf",
                             full.names = T)
     if (length(dotp)>0) {
@@ -269,7 +269,7 @@ if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
         plot(dot_go)
       }
     }
-    cnetp=list.files(path=paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology"),
+    cnetp=list.files(path=paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Gene_ontology"),
                             pattern = "cnetplot_GO_.*\\.pdf",
                             full.names = T)
     if (length(cnetp)>0) {
@@ -278,7 +278,7 @@ if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
         plot(cnet_go)
       }
     }
-    hist=list.files(path=paste0(out_dir,"/",comp[i],"/Meta-analysis/Gene_ontology"),
+    hist=list.files(path=paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Gene_ontology"),
                             pattern = "hist_.*\\.pdf",
                             full.names = T)
     if (length(hist)>0) {
@@ -295,7 +295,7 @@ if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
 
 ```{r comment="", results='asis'}
 
-if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
+if (file.exists(paste0(out_dir,"/",comp[1],"/Tertiary-analysis"))) {
   
 cat("## Pathway analysis
 
@@ -307,19 +307,19 @@ The outputs obtained are a dotplot and a cnetplot. In both are shown the five mo
 ```
 
 ```{r comment="", results='asis', fig.align='center', message=FALSE, out.width = "100%", out.height="100%", dpi = 500}
-if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) {
+if (file.exists(paste0(out_dir,"/",comp[1],"/Tertiary-analysis"))) {
   for (i in 1:length(comp)) {
     cat(paste0("\n\n###",comp[i]),"\n\n\n")
-    if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/dotplot_pathways.png"))) {
-      dot=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))
+    if (file.exists(paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Pathway_analysis/dotplot_pathways.png"))) {
+      dot=image_read_pdf(paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Pathway_analysis/dotplot_pathways.pdf"))
       plot(dot)
     }
-    if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/cnetplot_pathways.png"))) {
-      cnet_path=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/cnetplot_pathways.pdf"))
+    if (file.exists(paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Pathway_analysis/cnetplot_pathways.png"))) {
+      cnet_path=image_read_pdf(paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Pathway_analysis/cnetplot_pathways.pdf"))
       plot(cnet_path)
     }
-    if (file.exists(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/hist_pathway.png"))) {
-      hist_path=image_read_pdf(paste0(out_dir,"/",comp[i],"/Meta-analysis/Pathway_analysis/hist_pathway.pdf"))
+    if (file.exists(paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Pathway_analysis/hist_pathway.png"))) {
+      hist_path=image_read_pdf(paste0(out_dir,"/",comp[i],"/Tertiary-analysis/Pathway_analysis/hist_pathway.pdf"))
       plot(hist_path)
     }
   }

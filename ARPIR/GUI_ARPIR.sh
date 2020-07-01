@@ -99,11 +99,11 @@ if [ ${quant} = "Cufflinks" ]; then
 	dea="cummeRbund";
 fi
 
-meta=$(zenity --list --text="Choose whether to perform analysis with final meta-analysis or stop after quantification and DEA analysis" --radiolist --column "" --column "Analysis" --hide-header --title="Analysis" TRUE "full" FALSE "quant")
+tertiary=$(zenity --list --text="Choose whether to perform analysis with final tertiary-analysis or stop after quantification and DEA analysis" --radiolist --column "" --column "Analysis" --hide-header --title="Analysis" TRUE "full" FALSE "quant")
 
-if [ ${meta} = "full" ]; then
+if [ ${tertiary} = "full" ]; then
 	max_cat=$(zenity --forms --title="Max category" --text="Number of category to show in R plots" --add-entry="Category number");
-elif [ ${meta} = "quant" ]; then
+elif [ ${tertiary} = "quant" ]; then
 	max_cat="5"
 fi
 
@@ -147,7 +147,7 @@ output_directory = "$OUT"
 
 log_directory = "$LOGF"
 
-meta-analysis = "$meta"
+tertiary-analysis = "$tertiary"
 
 category_number = "$max_cat"
 
@@ -156,14 +156,14 @@ threads = "$threads | zenity --text-info --title="Summary" --width=700 --height=
 if [ ${se_pe} = "Paired_end" ]; then
 	if [ "$?" -eq "0" ]; then
 		cd ${OUT}
-		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -r2 $READ2 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -rs $REF_STAR -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -meta $meta -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
+		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -r2 $READ2 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -rs $REF_STAR -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -tertiary $tertiary -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
 	fi
 fi
 
 if [ ${se_pe} = "Single_end" ]; then
 	if [ "$?" -eq "0" ]; then
 		cd ${OUT}
-		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -rs $REF_STAR -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -meta $meta -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
+		python $R/ARPIR.py -n $pname -pn $poolname -sn $snames -r1 $READ1 -type $stype -rb $REF_BOWTIE -rh $REF_HISAT -rs $REF_STAR -bed $BED -ph $PHIX -rib1 $RIB1 -rib2 $RIB2 -t $threads -g $GTF -a $alignment -l $library -q $quant -r $REF -dea $dea -r_path $R -o $OUT -tertiary $tertiary -cat $max_cat -comp $comp 2>&1 >> ${LOGF}/${LOG}.log
 	fi
 fi
 

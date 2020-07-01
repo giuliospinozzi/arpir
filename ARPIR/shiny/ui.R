@@ -121,7 +121,7 @@ shinyUI(fluidPage(
                           )
                         )
                ),
-               tabPanel("Meta-analysis",
+               tabPanel("Tertiary-analysis",
                         fluidRow(
                           column(6,offset=3,
                                  wellPanel(
@@ -129,11 +129,11 @@ shinyUI(fluidPage(
                                  )
                           )
                         ),
-                        uiOutput("Meta_analysis"),
-                        if (!file.exists(paste0(out_dir,"/",strsplit(as.character(gen_sum[7,1]),",")[[1]][1],"/Meta-analysis"))){
+                        uiOutput("Tertiary_analysis"),
+                        if (!file.exists(paste0(out_dir,"/",strsplit(as.character(gen_sum[7,1]),",")[[1]][1],"/Tertiary-analysis"))){
                           column(12,align="center",
                                  br(),
-                                 tags$span(style="font-size: 34px", strong("No meta-analysis"))
+                                 tags$span(style="font-size: 34px", strong("No Tertiary-analysis"))
                           )
                         }
                ),

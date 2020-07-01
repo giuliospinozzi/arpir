@@ -114,7 +114,7 @@ shinyServer(function(input, output, session) {
     }
     
     
-    ## Meta-analysis
+    ## Tertiary-analysis
     GO1=list()
     GO_gene1=list()
     tree=list()
@@ -125,33 +125,33 @@ shinyServer(function(input, output, session) {
     hist_go_a=list()
     hist_path=list()
     for (j in 1:length(comp)) {
-      if (file.exists(paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology/tab_GO_genes.csv"))){
-        GO=read.csv(paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology/GO_fc1.5_pv0.05.csv"))
+      if (file.exists(paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology/tab_GO_genes.csv"))){
+        GO=read.csv(paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology/GO_fc1.5_pv0.05.csv"))
         if(nrow(GO)>0) {
           GO=GO[,c(1,2,3,4,5,6,7,9,10,8)]
           for (i in 5:7){GO[,i]=signif(GO[,i],digits=3)}
         }
         GO1=list.append(GO1,GO)
-        GO_gene=read.csv(paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology/tab_GO_genes.csv"))
+        GO_gene=read.csv(paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology/tab_GO_genes.csv"))
         GO_gene$logFC=signif(GO_gene$logFC,digits = 3)
         GO_gene1=list.append(GO_gene1,GO_gene)
-        tree=list.append(tree,image_read_pdf(paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.pdf")))
+        tree=list.append(tree,image_read_pdf(paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology/treemap_GO_fc1.5_pv0.05.pdf")))
         dot_go=list()
-        dotp_bp=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+        dotp_bp=list.files(path=paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology"),
                            pattern = "dotplot_GO_BP.pdf",
                            full.names = T)
         if(length(dotp_bp)>0) {
           dot_go=list.append(dot_go,image_read_pdf(dotp_bp))
           names(dot_go)[[length(dot_go)]]="Biological Process"
         }
-        dotp_cc=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+        dotp_cc=list.files(path=paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology"),
                            pattern = "dotplot_GO_CC.pdf",
                            full.names = T)
         if(length(dotp_cc)>0) {
           dot_go=list.append(dot_go,image_read_pdf(dotp_cc))
           names(dot_go)[[length(dot_go)]]="Cellular Component"
         }
-        dotp_mf=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+        dotp_mf=list.files(path=paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology"),
                            pattern = "dotplot_GO_MF.pdf",
                            full.names = T)
         if(length(dotp_mf)>0) {
@@ -160,21 +160,21 @@ shinyServer(function(input, output, session) {
         }
         dot_go1=list.append(dot_go1,dot_go)
         hist_go=list()
-        hist_bp=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+        hist_bp=list.files(path=paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology"),
                            pattern = "hist_biological_process.png",
                            full.names = T)
         if(length(hist_bp)>0) {
           hist_go=list.append(hist_go,image_read(hist_bp))
           names(hist_go)[[length(hist_go)]]="Biological Process"
         }
-        hist_cc=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+        hist_cc=list.files(path=paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology"),
                            pattern = "hist_cellular_component.png",
                            full.names = T)
         if(length(hist_cc)>0) {
           hist_go=list.append(hist_go,image_read(hist_cc))
           names(hist_go)[[length(hist_go)]]="Cellular Component"
         }
-        hist_mf=list.files(path=paste0(out_dir,"/",comp[j],"/Meta-analysis/Gene_ontology"),
+        hist_mf=list.files(path=paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Gene_ontology"),
                            pattern = "hist_molecular_function.png",
                            full.names = T)
         if(length(hist_mf)>0) {
@@ -183,15 +183,15 @@ shinyServer(function(input, output, session) {
         }
         hist_go_a=list.append(hist_go_a,hist_go)
       }
-      if (file.exists(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))){
-        path=read.csv(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/pathway_FC1.5_pv0.05.csv"))
+      if (file.exists(paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Pathway_analysis/dotplot_pathways.pdf"))){
+        path=read.csv(paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Pathway_analysis/pathway_FC1.5_pv0.05.csv"))
         if(nrow(path)>0) {
           for (i in 5:7){path[,i]=signif(path[,i],digits=3)}
           path=path[,c(1,2,3,4,5,6,7,9,8)]
         }
         path1=list.append(path1,path)
-        dot=list.append(dot,image_read_pdf(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf")))
-        hist_path=list.append(hist_path,image_read(paste0(out_dir,"/",comp[j],"/Meta-analysis/Pathway_analysis/hist_pathway.png")))
+        dot=list.append(dot,image_read_pdf(paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Pathway_analysis/dotplot_pathways.pdf")))
+        hist_path=list.append(hist_path,image_read(paste0(out_dir,"/",comp[j],"/Tertiary-analysis/Pathway_analysis/hist_pathway.png")))
       }
       incProgress(1/n)
     }
@@ -324,7 +324,7 @@ shinyServer(function(input, output, session) {
   })
   
   ## Gene Ontology
-  if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis/Gene_ontology/tab_GO_genes.csv"))){
+  if (file.exists(paste0(out_dir,"/",comp[1],"/Tertiary-analysis/Gene_ontology/tab_GO_genes.csv"))){
     
     for (i in 1:length(comp)) {
       local({
@@ -455,7 +455,7 @@ shinyServer(function(input, output, session) {
     
   }
   ## Pathway analysis
-  if (file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis/Pathway_analysis/dotplot_pathways.pdf"))){
+  if (file.exists(paste0(out_dir,"/",comp[1],"/Tertiary-analysis/Pathway_analysis/dotplot_pathways.pdf"))){
     
     for (i in 1:length(comp)) {
       local({
@@ -515,10 +515,10 @@ shinyServer(function(input, output, session) {
     
   }
   
-  ## Meta-analysis
-  output$Meta_analysis <- renderUI({
+  ## Tertiary-analysis
+  output$Tertiary_analysis <- renderUI({
     panels <- list()
-    if(file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) panels[[1]] <- tabPanel("GO analysis",
+    if(file.exists(paste0(out_dir,"/",comp[1],"/Tertiary-analysis"))) panels[[1]] <- tabPanel("GO analysis",
                                                                                           
                                                                                           fluidRow(
                                                                                             column(12,
@@ -568,7 +568,7 @@ shinyServer(function(input, output, session) {
                                                                                             )
                                                                                           )
     )
-    if(file.exists(paste0(out_dir,"/",comp[1],"/Meta-analysis"))) panels[[2]] <- tabPanel("Pathway analysis",
+    if(file.exists(paste0(out_dir,"/",comp[1],"/Tertiary-analysis"))) panels[[2]] <- tabPanel("Pathway analysis",
                                                                                           fluidRow(
                                                                                             column(12,
                                                                                                    br(),

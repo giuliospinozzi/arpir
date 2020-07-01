@@ -42,14 +42,14 @@ header = """
   -dea, --dea-method [edgeR,DESeq2,cummeRbund]
   -r_path, --r_path [/opt/applications/src/arpir/ARPIR]
   -o, --output-dir
-  -meta, --meta-analysis [full,quant]
+  -tertiary, --tertiary-analysis [full,quant]
   -cat, --max-cat [5]
   -comp, --comparisons
   
 """ 
 
 
-description = "This application makes quality control, pre-processing, alignment, transcript quantification, differential expression analysis and optionaly meta-analysis on FastQ files"
+description = "This application makes quality control, pre-processing, alignment, transcript quantification, differential expression analysis and optionaly tertiary-analysis on FastQ files"
 
 usage_example = """
 Examples of usage:
@@ -84,8 +84,8 @@ parser.add_argument('-r', '--reference-genome', dest="ref_gen", help="Reference 
 parser.add_argument('-dea', '--dea-method', dest="dea_method", help="Differential Expression Analysis method. \n Default: edgeR; alternatives: DESeq2, cummeRbund. \n", action="store", required=False, default="edgeR")
 parser.add_argument('-r_path', '--r_path', dest="R_path", help="Script directory (alignment, quantification and DEA). \n Default: /opt/applications/src/arpir/ARPIR. \n", action="store", required=False, default="/opt/applications/src/arpir/ARPIR")
 parser.add_argument('-o', '--output-dir', dest="output_dir", help="Output directory. \n No default option. \n", action="store", required=True)
-parser.add_argument('-meta', '--meta-analysis', dest="meta", help="Analysis with or without final meta-analysis. \n Default: full; alternative: quant. \n", action="store", required=False, default="full")
-parser.add_argument('-cat', '--max_cat', dest="max_cat", help="Max number of category showed in R plots for meta-analysis. \n Default: 5. \n", action="store", required=False, default="5")
+parser.add_argument('-tertiary', '--tertiary-analysis', dest="tertiary", help="Analysis with or without final tertiary-analysis. \n Default: full; alternative: quant. \n", action="store", required=False, default="full")
+parser.add_argument('-cat', '--max_cat', dest="max_cat", help="Max number of category showed in R plots for tertiary-analysis. \n Default: 5. \n", action="store", required=False, default="5")
 parser.add_argument('-comp', '--comparisons', dest="comp", help="Comparisons (cntrl_VS_treat1,cntrl_VS_treat2). \n No default option. \n", action="store", required=True)
 
 args = parser.parse_args()
@@ -182,7 +182,7 @@ def checkArgs(args):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no quantification script.\n\tExit\n" + '\033[0m')
         sys.exit()
     if not os.path.isfile(script_path3) or not os.path.isfile(script_path4):
-        print ('\033[0;31m' + "\n[AP]\tError while reading files: no meta-analysis scripts.\n\tExit\n" + '\033[0m')
+        print ('\033[0;31m' + "\n[AP]\tError while reading files: no tertiary-analysis scripts.\n\tExit\n" + '\033[0m')
         sys.exit()
     if not os.path.isfile(script_path6) or not os.path.isfile(script_path7) or not os.path.isfile(script_path8):
         print ('\033[0;31m' + "\n[AP]\tError while reading files: no DEA scripts.\n\tExit\n" + '\033[0m')
@@ -301,11 +301,11 @@ def rminput(output_dir,project_name,pool_name):
     os.system("rm "+output_dir+'/'+project_name+'/'+pool_name+'/input.csv')
     
     
-def metaanalysis(output_dir,R_path,project_name,pool_name,dea_method,max_cat,comp):
+def tertiaryanalysis(output_dir,R_path,project_name,pool_name,dea_method,max_cat,comp):
     """
-    Run meta-analysis script as desired
+    Run tertiary-analysis script as desired
     """
-    cmd="Rscript --vanilla --verbose "+R_path+"/GO_pathway.R "+output_dir+'/'+project_name+'/'+pool_name+'/'+comp+'/Quantification_and_DEA/*-results.csv '+dea_method+" "+output_dir+'/'+project_name+'/'+pool_name+'/'+comp+"/Meta-analysis "+max_cat+" "+R_path
+    cmd="Rscript --vanilla --verbose "+R_path+"/GO_pathway.R "+output_dir+'/'+project_name+'/'+pool_name+'/'+comp+'/Quantification_and_DEA/*-results.csv '+dea_method+" "+output_dir+'/'+project_name+'/'+pool_name+'/'+comp+"/Tertiary-analysis "+max_cat+" "+R_path
     os.system(cmd)
 
 
@@ -341,10 +341,10 @@ def main():
         input_all.to_csv (r''+args.output_dir+'/'+args.project_name+'/'+args.pool_name+'/input.csv', index = None, header=True)
         os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i])
         os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Quantification_and_DEA")
-        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Meta-analysis")
-        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Meta-analysis/Gene_ontology")
-        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Meta-analysis/Pathway_analysis")
-        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Meta-analysis/Pathway_analysis/pathview")
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Tertiary-analysis")
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Tertiary-analysis/Gene_ontology")
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Tertiary-analysis/Pathway_analysis")
+        os.system("mkdir "+args.output_dir+"/"+args.project_name+"/"+args.pool_name+"/"+comp1[i]+"/Tertiary-analysis/Pathway_analysis/pathview")
 
         # quantification
         quantification(args.output_dir,args.project_name,args.pool_name,args.R_path,args.dea_method,args.q_method,args.Threads,args.GTF,args.library_type,args.ref_gen,comp1[i])
@@ -352,9 +352,9 @@ def main():
         # remove input file
         rminput(args.output_dir,args.project_name,args.pool_name)
 
-        # meta-analysis (GO and pathway analysis)
-        if args.meta == 'full':
-            metaanalysis(args.output_dir,args.R_path,args.project_name,args.pool_name,args.dea_method,args.max_cat,comp1[i])
+        # Tertiary-analysis (GO and pathway analysis)
+        if args.tertiary == 'full':
+            tertiaryanalysis(args.output_dir,args.R_path,args.project_name,args.pool_name,args.dea_method,args.max_cat,comp1[i])
 
     # final report
     report(args.output_dir,args.project_name,args.pool_name)
