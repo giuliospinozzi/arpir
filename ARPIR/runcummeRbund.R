@@ -17,10 +17,14 @@ fpkm <- repFpkmMatrix(genes(cuff_data))
 #change sample names
 sam_names=read.table(paste0(cuffdiff,"/read_groups.info"),header = T)
 sam_names$name1=paste0(sam_names$condition,"_",sam_names$replicate_num)
+index=c()
 for (i in 1:nrow(sam_names)) {
   sam_names$name2[i]=gsub("^.*?Quantification_and_DEA/","",sam_names$file[i])
   sam_names$name2[i]=gsub("/cuffquant/abundances.cxb$","",sam_names$name2[i])
-  colnames(fpkm)[grep(sam_names$name1[i],colnames(fpkm))]=sam_names$name2[i]
+  index=append(index,grep(sam_names$name1[i],colnames(fpkm)))
+}
+for (i in 1:length(index)) {
+  colnames(fpkm)[index[i]]=sam_names$name2[i]
 }
 DataGroups <- c()
 for (i in 1:ncol(fpkm)) {
