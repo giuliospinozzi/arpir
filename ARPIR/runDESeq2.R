@@ -14,18 +14,13 @@ lenth_genes <- countdata1[ ,5,drop=F]
 countdata <- countdata1[ ,6:ncol(countdata1)]
 input_table <- read.csv(input,sep=",")
 input_table$sample_name=gsub("-",".",input_table$sample_name)
-for (i in 1:nrow(input_table)) {
-  colnames(countdata)[grep(input_table$sample_name[i],colnames(countdata))] <- as.character(input_table$sample_name[i])
-}
+colnames(countdata) <- as.character(input_table$sample_name)
 
 # Convert to matrix
 countdata <- as.matrix(countdata)
 
 # experimental design
-type <- c()
-for (k in 1:ncol(countdata)) {
-  type <- c(type,as.character(input_table$Type[grep(colnames(countdata)[k],input_table$sample_name)]))
-}
+type <- as.character(input_table$Type)
 DataGroups <- factor(type)
 DataGroups <- relevel(DataGroups,ref=as.character(strsplit(comp,"_VS_")[[1]][1]))
 
