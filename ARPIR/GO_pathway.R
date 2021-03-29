@@ -250,38 +250,31 @@ if (nrow(kk@result)>0) {
     }
     p=tab_all[tab_all$GO %in% names,]
     p1=p[p$FDR<0.05 & abs(p$logFC)>1.5,]
-    p1$fc=ifelse(p1$logFC>=0,"up","down")
+    p1$fc=ifelse(p1$logFC>=0,"up-regulated","down-regulated")
     p1=p1[!is.na(p1$Gene),c("Gene","GO","fc","logFC")]
     
     plotting_df <-
       p1 %>% 
       group_by(GO, fc) %>% 
       summarise(Freq = n()) %>% 
-      mutate(Freq = if_else(fc == "down", -Freq, Freq))
-    plotting_df$FoldChange=NA
-    for (i in 1:nrow(plotting_df)) {
-      plotting_df$FoldChange[i]=mean(p1$logFC[p1$GO==plotting_df$GO[i] & 
-                                                p1$fc==plotting_df$fc[i]])
-    }
-    temp_df <-
-      plotting_df %>% 
-      filter(fc == "up") %>% 
-      arrange(Freq)
-    the_order <- temp_df$GO
+      mutate(Freq = if_else(fc == "down-regulated", -Freq, Freq))
+    the_order <- names
+    if (max(abs(plotting_df$Freq))>10) {by_step=5} else {by_step=2}
     q <- 
       plotting_df %>% 
-      ggplot(aes(x = GO, y = Freq, fill= FoldChange)) +
+      ggplot(aes(x = GO, y = Freq, fill= fc)) +
       geom_bar(stat = "identity", width = 0.75) +
       coord_flip() +
-      scale_x_discrete(limits = the_order) +
-      scale_y_continuous(breaks = seq(-300, 300, 10), labels = abs(seq(-300, 300, 10))) +
-      labs(x = "GO", y = "Gene count", title = "\nGene Ontology", fill="FoldChange mean",
+      scale_x_discrete(limits = rev(the_order)) +
+      scale_y_continuous(breaks = seq(-300, 300, by_step), 
+                         labels = abs(seq(-300, 300, by_step))) +
+      labs(x = "GO", y = "Gene count", title = "\nGene Ontology", fill="",
            subtitle = paste0(unique(tab_all$GO_domain)[j],"\n")) +
-      theme(legend.position = "right",
+      theme(legend.position = "bottom",
             plot.title = element_text(hjust = 0.5,face = "bold", size = 16),
             plot.subtitle = element_text(hjust = 0.5,face = "bold", size = 12),
             panel.background = element_rect(fill =  "grey90")) +
-      scale_fill_gradient2(midpoint=0, low="dodgerblue1", mid="white", high="firebrick2")
+      scale_fill_manual(values = c("down-regulated"="dodgerblue1", "up-regulated"="firebrick2"))
     
     pdf(paste0(output_dir,"/Gene_ontology/hist_",unique(tab_all$GO_domain)[j],".pdf"),10,6)
     print(q)
@@ -307,36 +300,28 @@ if (nrow(kk@result)>0) {
   p1=data.frame()
   for (i in 1:length(p)) {p1=rbind(p1,p[[i]])}
   p_go=p1[p1$FDR<0.05 & abs(p1$logFC)>1.5,]
-  p_go$fc=ifelse(p_go$logFC>=0,"up","down")
+  p_go$fc=ifelse(p_go$logFC>=0,"up-regulated","down-regulated")
   p_go=p_go[!is.na(p_go$Gene),c("Gene","path","fc","logFC")]
   plotting_df <-
     p_go %>% 
     group_by(path, fc) %>% 
     summarise(Freq = n()) %>% 
-    mutate(Freq = if_else(fc == "down", -Freq, Freq))
-  plotting_df$FoldChange=NA
-  for (i in 1:nrow(plotting_df)) {
-    plotting_df$FoldChange[i]=mean(p_go$logFC[p_go$path==plotting_df$path[i] & 
-                                                p_go$fc==plotting_df$fc[i]])
-  }
-  temp_df <-
-    plotting_df %>% 
-    filter(fc == "up") %>% 
-    arrange(Freq)
-  the_order <- temp_df$path
+    mutate(Freq = if_else(fc == "down-regulated", -Freq, Freq))
+  the_order <- names
+  if (max(abs(plotting_df$Freq))>10) {by_step=5} else {by_step=2}
   q <- 
     plotting_df %>% 
-    ggplot(aes(x = path, y = Freq, fill= FoldChange)) +
+    ggplot(aes(x = path, y = Freq, fill= fc)) +
     geom_bar(stat = "identity", width = 0.75) +
     coord_flip() +
-    scale_x_discrete(limits = the_order) +
-    scale_y_continuous(breaks = seq(-300, 300, 10), 
-                       labels = abs(seq(-300, 300, 10))) +
-    labs(x = "Pathway", y = "Gene count", title = "\nPathways\n", fill="FoldChange mean") +
-    theme(legend.position = "right",
+    scale_x_discrete(limits = rev(the_order)) +
+    scale_y_continuous(breaks = seq(-300, 300, by_step), 
+                       labels = abs(seq(-300, 300, by_step))) +
+    labs(x = "Pathway", y = "Gene count", title = "\nPathways\n", fill="") +
+    theme(legend.position = "bottom",
           plot.title = element_text(hjust = 0.5,face = "bold", size = 16),
           panel.background = element_rect(fill =  "grey90")) +
-    scale_fill_gradient2(midpoint=0, low="dodgerblue1", mid="white", high="firebrick2")
+    scale_fill_manual(values = c("down-regulated"="dodgerblue1", "up-regulated"="firebrick2"))
   
   pdf(paste0(output_dir,"/Pathway_analysis/hist_pathway.pdf"),10,6)
   print(q)
