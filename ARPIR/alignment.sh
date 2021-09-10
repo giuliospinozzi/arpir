@@ -203,8 +203,8 @@ elif [ ${ANALYSIS_PROTOCOL} = "hisat"  ]; then
 		samtools index ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam;
 		BAM="${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.sorted.bam";
 	fi
-	READS_MAPPED_1=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.txt | grep 'Aligned 1 time' | cut -d' ' -f4`)) ;
-	READS_MAPPED_2=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.txt | grep 'Aligned >1 times' | cut -d' ' -f4`)) ;
+	READS_MAPPED_1=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.txt | grep 'Aligned concordantly 1 time' | cut -d' ' -f5`)) ;
+	READS_MAPPED_2=$((`cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/HISAT2/${LIBRARY_NAME}/${LIBRARY_NAME}.txt | grep 'Aligned concordantly >1 times' | cut -d' ' -f5`)) ;
 	READS_MAPPED=$(($READS_MAPPED_1 + $READS_MAPPED_2));
 	printf "<`date +'%Y-%m-%d %H:%M:%S'`> ${RED}##### READS MAPPED: ${READS_MAPPED} #####${NC}\n"
 	cat ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input_all.csv && echo "${LIBRARY_NAME},${BAM},${SAMPLE_TYPE}" >> ${RESULTS_DIR}/${PROJECT_NAME}/${POOL_NAME}/input_all.csv
