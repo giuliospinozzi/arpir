@@ -3,11 +3,22 @@
 ## Introduction
 <p align="justify"> ARPIR makes RNA-Seq analysis: quality control, pre-processing, alignment (primary-analysis), transcript quantification and differential expression analysis on BAM files (secondaty-analysis). Given the input files and the working directory, the pipeline is completely automated. First, quality control on FastQ files is performed with FastQC and FastQ Screen. FastQC makes quality control and creates one report for sample. FastQ Screen estimates approximately the percentage of reads that can be mapped on genomes other than human, like ribosomal genomes, PhiX genome and mouse genome. This allows to evaluate the presence of contaminating genomes. Pre-processing follows quality control: the reads are aligned on PhiX genome and ribosomal genome to eliminate contaminations. Alignment can be performed with TopHat2, HISAT2 or STAR; in the first case quantification is performed with Cufflinks and DEA with cummeRbund, in the second case quantification is performed with featureCounts and DEA with DESeq2 or edgeR, in the third case it is possible to choose one of the previous methods for quantification and DEA. A second intermediate quality control analysis is also performed on the aligned BAM files with some of the RSeQC scripts and in particular: inner_distance, junction_annotation, junction_saturation, bam_stat, read_distribution, geneBody_coverage. A final report is generated from the results using multiqc. It is possible to perform an optional tertiary-analysis on the results. It consists in Gene Ontology enrichment analysis and KEGG Pathway enrichment analysis on the differentially expressed genes (with absolute Fold Change value higher than 1.5 and adjusted p-value lower than 0.05). </p>
 
-## Prerequisites
+## Install Option 1 (suggested)
+If you have a newer system please use Conda to install some important packages and comment in the configuration script the relative lines:
+
+```
+conda env create -f arpir.yml
+
+```
+Change py interpreter in each py script used (/opt/anaconda3/envs/arpir/bin/python2)
+
+## Install Option 2 (old)
 <p align="justify"> For ARPIR to work properly, you must first make sure that you have installed the necessary applications for the pipeline. You can use the conf.sh configuration file to install all the required software and dependencies, as well as download the genome files. The script runs on Debian-based systems and you can run it with the following command: </br>
 
 ```sudo bash conf.sh```
-  
+
+## Install Option 3 (manually)
+
 If instead you want to manually proceed with the installation of the prerequisites, the necessary ones are the following: </p>
 
 ### Applications
